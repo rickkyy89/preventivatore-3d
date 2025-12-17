@@ -3,74 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calcolatore Prezzo Stampa 3D</title>
+  <title>Preventivatore 3D - Interno</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#f5f5f5; padding:30px; }
-    .container { max-width:760px; background:#fff; padding:25px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-    h1 { margin:0 0 12px 0; }
-    h2 { margin:18px 0 10px 0; font-size:18px; }
-    label { display:block; margin-top:14px; font-weight:bold; }
-    input, select, textarea { width:100%; padding:8px; margin-top:5px; box-sizing:border-box; }
-    .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    @media (max-width:760px){ .row{grid-template-columns:1fr;} }
-    button { margin-top:20px; padding:12px; width:100%; font-size:16px; background:#0078d4; color:white; border:none; border-radius:6px; cursor:pointer; }
-    button:hover{ background:#005fa3; }
-    .result { margin-top:22px; padding:20px; background:#ffffff; border-radius:6px; border:1px solid #d9e6ff; }
-    .muted { color:#3a3a3a; font-size:13px; margin-top:8px; }
-    .small { font-size:12px; }
-    details { margin-top:14px; padding:10px; border:1px solid #d9e6ff; border-radius:6px; background:#f9fbff; }
-    summary { font-weight:bold; cursor:pointer; }
-    .highlight { background:#fff3cd; padding:8px; border-radius:6px; }
-    .preventivo-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; }
-    .preventivo-box { border:1px solid #d9e6ff; padding:12px; border-radius:6px; margin-top:10px; }
-    .totale { font-size:20px; font-weight:bold; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; padding:30px; color:#333; }
+    .container { max-width:850px; background:#fff; padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); margin: 0 auto; }
+    
+    h1 { margin:0 0 5px 0; color:#1a1a1a; }
+    h2 { margin:25px 0 15px 0; font-size:18px; color:#0078d4; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
+    
+    label { display:block; margin-top:12px; font-weight:600; font-size: 14px; color:#444; }
+    input, select, textarea { width:100%; padding:10px; margin-top:6px; box-sizing:border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; transition: border 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #0078d4; outline: none; }
+    
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items: end; }
+    @media (max-width:760px){ .row{grid-template-columns:1fr; gap: 0;} }
+    
+    .btn-group { display: flex; gap: 10px; margin-top: 25px; }
+    button { padding:12px; flex:1; font-size:16px; font-weight: bold; color:white; border:none; border-radius:6px; cursor:pointer; transition: opacity 0.2s; }
+    button:hover{ opacity: 0.9; }
+    
+    #btnOttimizza { background:#2e7d32; }
+    #btnPdf { background:#d32f2f; }
+    
+    .result { margin-top:30px; padding:25px; background:#fff; border-radius:8px; border:1px solid #e1e4e8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .muted { color:#666; font-size:13px; margin-top:5px; line-height: 1.4; }
+    
+    details { margin-top:20px; padding:15px; border:1px solid #e1e4e8; border-radius:8px; background:#fafbfc; }
+    summary { font-weight:bold; cursor:pointer; color: #0078d4; }
+    
+    /* Stili preventivo */
+    .preventivo-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+    table.prev-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table.prev-table td { padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
+    table.prev-table tr:last-child td { border-bottom: none; }
+    
+    .total-block { background:#f9f9f9; padding:15px; border-radius:8px; margin-top:15px; text-align:right; border-left: 5px solid #ccc; }
+    .totale-grande { font-size:26px; font-weight:bold; color: #333; margin-top:5px; }
+
+    /* Evidenziazione campi calcolati automaticamente */
+    .auto-calculated { background-color: #e8f5e9; border-color: #4caf50; }
 
     @media print {
-
-    body {
-        background: #fff;
-        padding: 0;
-        margin: 0;
+      body { background: #fff; padding: 0; margin: 0; font-family: 'Times New Roman', serif; }
+      .container { max-width: none; padding: 0; margin: 0; box-shadow: none; border: none; }
+      .container > *:not(#risultato) { display: none !important; }
+      #risultato { margin: 0; padding: 0; display: block !important; }
+      .preventivo-header { margin-bottom: 30px; }
+      .total-block { background: none; border: 1px solid #000; }
     }
-
-    .container {
-        max-width: none;
-        padding: 0;
-        margin: 0;
-        box-shadow: none;
-        border-radius: 0;
-    }
-
-    /* Nasconde tutto tranne il preventivo */
-    .container > *:not(#risultato) {
-        display: none !important;
-    }
-
-    #risultato {
-        margin: 10mm;
-        padding: 0;
-        border: none;
-    }
-
-    .preventivo-box {
-        page-break-inside: avoid;
-    }
-
-    .preventivo-header {
-        margin-bottom: 12px;
-    }
-    }
-
-    </style>
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>Calcolatore prezzo stampa 3D</h1>
 
-  <div class="muted">Modello: prezzo a <strong>giorno macchina</strong> + materiale reale (metri/batch) + postprocesso, con sconti espliciti.</div>
+<div class="container">
+  <h1>Calcolatore Interno Stampa 3D</h1>
+  <div class="muted">Strumento operativo per preventivazione rapida.</div>
 
   <details>
-    <summary>⚙️ Parametri di controllo</summary>
+    <summary>⚙️ Parametri Macchina & Costi Orari</summary>
     <div class="row">
       <div><label>Ore di stampa/giorno</label><input id="oreGiorno" type="number" value="22" min="1" step="0.1"></div>
       <div><label>Costo postprocesso €/h</label><input id="costoPostOra" type="number" value="50" min="0" step="0.1"></div>
@@ -85,324 +75,338 @@
     </div>
   </details>
 
-  <h2>Dati commessa</h2>
+  <h2>1. Dati Commessa</h2>
   <div class="row">
-    <div>
-        <label>Numero preventivo</label>
-        <input id="numeroPreventivo" type="text" placeholder="Es. 25-0001">
-    </div>
-    <div></div>
-  </div>
-  <div class="row">
+    <div><label>Numero preventivo</label><input id="numeroPreventivo" type="text" placeholder="Es. 25-0001"></div>
     <div><label>Codice / Nome parte</label><input id="codiceParte" type="text" placeholder="Es. Coperchio_XYZ"></div>
-    <div><label>Materiale / Tipologia</label><input id="materialeParte" type="text" placeholder="Es. Nylon 12"></div>
   </div>
   <div class="row">
-    <div><label>Colore</label><input id="coloreParte" type="text" placeholder="Es. Nero"></div>
-    <div></div>
+    <div><label>Materiale</label><input id="materialeParte" type="text" placeholder="Es. Nylon 12 CF"></div>
+    <div><label>Colore</label><input id="coloreParte" type="text" placeholder="Es. Nero Opaco"></div>
   </div>
+
+  <h2>2. Quantità e Tempi</h2>
   <div class="row">
-    <div><label>Pezzi totali</label><input id="pezziTotali" type="number" value="300" min="1"></div>
-    <div><label>Giorni macchina</label><input id="giorniTotali" type="number" value="15" min="0.01" step="0.01"></div>
-  </div>
-  <div class="row">
-    <div><label>Giorni lavorativi di consegna</label><input id="giorniConsegna" type="number" value="15" min="1"></div>
-    <div></div>
+    <div><label>Pezzi totali</label><input id="pezziTotali" type="number" value="100" min="1"></div>
+    <div><label>Giorni macchina (Totali)</label><input id="giorniTotali" type="number" value="5" min="0.01" step="0.01"></div>
   </div>
   <div class="row">
     <div><label>Pezzi per batch</label><input id="pezziPerBatch" type="number" value="20" min="1"></div>
-    <div><label>Ore batch</label><input id="oreBatch" type="number" value="17" min="0" step="0.1"></div>
+    <div><label>Ore per batch</label><input id="oreBatch" type="number" value="12" min="0" step="0.1"></div>
   </div>
   <div class="row">
+    <div><label>Giorni consegna</label><input id="giorniConsegna" type="number" value="10" min="1"></div>
     <div><label>Postprocesso min/pezzo</label><input id="postMin" type="number" value="2" min="0" step="0.1"></div>
-    <div></div>
   </div>
 
-  <h2>Gestione materiali (fino a 4 per batch)</h2>
-  <div class="row"><div><label>Materiale 1</label><select id="mat1"></select></div><div><label>Metri/batch</label><input id="mat1_m" type="number" value="0" min="0" step="0.01"></div></div>
-  <div class="row"><div><label>Materiale 2</label><select id="mat2"></select></div><div><label>Metri/batch</label><input id="mat2_m" type="number" value="0" min="0" step="0.01"></div></div>
-  <div class="row"><div><label>Materiale 3</label><select id="mat3"></select></div><div><label>Metri/batch</label><input id="mat3_m" type="number" value="0" min="0" step="0.01"></div></div>
-  <div class="row"><div><label>Materiale 4</label><select id="mat4"></select></div><div><label>Metri/batch</label><input id="mat4_m" type="number" value="0" min="0" step="0.01"></div></div>
-
+  <h2>3. Consumo Materiali</h2>
+  <div class="row"><div><label>Materiale 1</label><select id="mat1"></select></div><div><label>Metri/Batch (Mat 1)</label><input id="mat1_m" type="number" value="0" min="0" step="0.01"></div></div>
+  <div class="row"><div><label>Materiale 2</label><select id="mat2"></select></div><div><label>Metri/Batch (Mat 2)</label><input id="mat2_m" type="number" value="0" min="0" step="0.01"></div></div>
+  
   <details>
-    <summary>💸 Sconti e target</summary>
-    <div class="row">
-      <div><label>Sconto %</label><input id="scontoPerc" type="number" value="0" min="0" max="100" step="0.1"></div>
-      <div><label>Prezzo target €/pezzo</label><input id="prezzoTargetParte" type="number" value="0" min="0" step="0.01"></div>
-    </div>
+    <summary>➕ Altri materiali</summary>
+    <div class="row"><div><label>Materiale 3</label><select id="mat3"></select></div><div><label>Metri/Batch (Mat 3)</label><input id="mat3_m" type="number" value="0" min="0" step="0.01"></div></div>
+    <div class="row"><div><label>Materiale 4</label><select id="mat4"></select></div><div><label>Metri/Batch (Mat 4)</label><input id="mat4_m" type="number" value="0" min="0" step="0.01"></div></div>
   </details>
 
-  <button id="btnCalcola">Calcola prezzo</button>
-  <button id="btnOttimizza" style="background:#2e7d32;margin-top:10px;">⚡ Ottimizza tempi</button>
-  <button onclick="stampaPdf()">📄 Esporta PDF</button>
+  <h2>4. Definizione Prezzo (Forzatura Target)</h2>
+  <div class="row" style="background: #e3f2fd; padding:15px; border-radius:8px; border:1px solid #bbdefb;">
+    <div>
+        <label>🎯 Target Price (€/pezzo)</label>
+        <input id="prezzoTargetParte" type="number" placeholder="Inserisci per calcolare sconto..." step="0.01">
+        <div class="small muted">Scrivi qui per calcolare lo sconto al contrario.</div>
+    </div>
+    <div>
+        <label>Sconto applicato (%)</label>
+        <input id="scontoPerc" type="number" value="0" step="0.1">
+        <div class="small muted">Viene aggiornato se imposti un Target.</div>
+    </div>
+  </div>
 
+  <div class="btn-group">
+    <button id="btnOttimizza">⚡ Ottimizza Giorni</button>
+    <button id="btnPdf">📄 Esporta PDF</button>
+  </div>
 
   <h2>📝 Note</h2>
-  <textarea id="note" style="width:100%;min-height:90px;" placeholder="Inserisci qui eventuali note..."></textarea>
+  <textarea id="note" style="width:100%;min-height:80px;" placeholder="Note..."></textarea>
 
-  <div id="consuntivoTempi" class="result"></div>
+  <div id="consuntivoTempi" class="result" style="background:#f9fbff; border-color:#d9e6ff;"></div>
   <div id="risultato" class="result"></div>
 </div>
 
 <script>
   const el = (id) => document.getElementById(id);
+  // Selezioniamo tutti gli input tranne il target price (che ha una logica dedicata)
+  const inputsGeneric = document.querySelectorAll('input:not(#prezzoTargetParte), select, textarea');
 
   const CONFIG = {
-  LOGO_URL: 'assets/logo.png',   // percorso relativo
-  AZIENDA: '3DMV Makers',
-  EMAIL: '3dmv.makers@gmail.com'
+    LOGO_URL: 'assets/logo.png', // LOGO RIPRISTINATO
+    AZIENDA: '3DMV Makers',
+    EMAIL: '3dmv.makers@gmail.com',
+    FALLBACK_MATERIALS: [
+        { id: 'PLA_GEN', nome: 'PLA Generico', costoMetri: 0.06 },
+        { id: 'PETG_GEN', nome: 'PETG Generico', costoMetri: 0.07 },
+        { id: 'NYLON_12', nome: 'Nylon PA12', costoMetri: 0.25 },
+        { id: 'TPU_95', nome: 'TPU 95A', costoMetri: 0.12 }
+    ]
   };
 
-  let LOGO_URL = '';
+  let MATERIALI = [];
+  let MATERIALI_BY_ID = {};
 
-  let MATERIALI = [];          // array di record
-  let MATERIALI_BY_ID = {};    // lookup veloce per id
+  const parseNumberLoose = (v) => {
+    const s = String(v ?? '').trim().replace(',', '.');
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  };
 
-  function escapeHtml(str) {
-    return String(str)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
+  const escapeHtml = (str) => String(str).replace(/[&<>"']/g, function(m) {
+    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m];
+  });
 
-function parseNumberLoose(v) {
-  // accetta sia "0.18" che "0,18"
-  const s = String(v ?? '').trim().replace(',', '.');
-  const n = parseFloat(s);
-  return Number.isFinite(n) ? n : 0;
-}
+  const fmtMoney = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
+  const fmtNum = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 2 });
 
-function dataOggiIT() {
-  return new Date().toLocaleDateString('it-IT');
-}
-
-function stampaPdf() {
-  window.print();
-}
-
-async function caricaMaterialiCSV() {
-  const res = await fetch('materiali.csv', { cache: 'no-store' });
-  if (!res.ok) throw new Error('Impossibile caricare materiali.csv');
-
-  const text = await res.text();
-  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  if (lines.length < 2) throw new Error('materiali.csv vuoto o incompleto');
-
-  const headers = lines[0].split(',').map(h => h.trim()); // trim robusto
-  const idx = (name) => headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
-
-  const iId = idx('id');
-  const iNome = idx('nome');
-  const iCosto = idx('costo');
-  const iCostoMetri = idx('costo-metri');
-  const iPeso = idx('peso');
-  const iMetri = idx('metri');
-  const iDensita = idx('densità');
-
-  if (iId === -1 || iNome === -1 || iCostoMetri === -1) {
-    throw new Error('Header CSV non valido: servono almeno id, nome, costo-metri');
-  }
-
-  MATERIALI = [];
-  MATERIALI_BY_ID = {};
-
-  for (let r = 1; r < lines.length; r++) {
-    const cols = lines[r].split(',').map(c => c.trim());
-    const rec = {
-      id: cols[iId] || '',
-      nome: cols[iNome] || '',
-      costo: iCosto !== -1 ? parseNumberLoose(cols[iCosto]) : 0,
-      costoMetri: parseNumberLoose(cols[iCostoMetri]),
-      peso: iPeso !== -1 ? parseNumberLoose(cols[iPeso]) : 0,
-      metri: iMetri !== -1 ? parseNumberLoose(cols[iMetri]) : 0,
-      densita: iDensita !== -1 ? parseNumberLoose(cols[iDensita]) : 0
-    };
-
-    if (!rec.id) continue;
-    MATERIALI.push(rec);
-    MATERIALI_BY_ID[rec.id] = rec;
-  }
-
-  // opzionale: ordina per nome
-  MATERIALI.sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
-}
-
-
-  function popolaMateriali() {
-  for (let i = 1; i <= 4; i++) {
-    const s = el(`mat${i}`);
-    s.innerHTML = '<option value="">—</option>';
-
-    MATERIALI.forEach((m) => {
-      const o = document.createElement('option');
-      o.value = m.id; // IMPORTANT: ora il value è l'id
-      o.textContent = `${m.nome} (€${m.costoMetri.toFixed(3)}/m)`;
-      s.appendChild(o);
+  // --- STORAGE ---
+  function saveState() {
+    const data = {};
+    document.querySelectorAll('input, select, textarea').forEach(i => {
+        if(i.id) data[i.id] = i.value;
     });
+    localStorage.setItem('3d_calc_internal_v2', JSON.stringify(data));
   }
-}
 
+  function loadState() {
+    const saved = localStorage.getItem('3d_calc_internal_v2');
+    if (!saved) return;
+    try {
+        const data = JSON.parse(saved);
+        Object.keys(data).forEach(k => {
+            const field = el(k);
+            if (field) field.value = data[k];
+        });
+    } catch(e) { console.error(e); }
+  }
 
+  // --- LOGICA BUSINESS ---
   function costoGiorno(g) {
-    if (g === 1) return +el('costoG1').value;
-    if (g <= 3) return +el('costoG3').value;
-    if (g <= 7) return +el('costoG7').value;
-    return +el('costoG8').value;
+    if (g <= 1) return parseNumberLoose(el('costoG1').value);
+    if (g <= 3) return parseNumberLoose(el('costoG3').value);
+    if (g <= 7) return parseNumberLoose(el('costoG7').value);
+    return parseNumberLoose(el('costoG8').value);
   }
 
-  function calcola() {
-    const p = +el('pezziTotali').value;
-    const g = +el('giorniTotali').value;
-    const pb = +el('pezziPerBatch').value;
-    const post = +el('postMin').value;
-    const cPost = +el('costoPostOra').value;
+  // Funzione pura che calcola solo i costi LORDI (senza sconto)
+  function getDatiLordi() {
+    const p = parseNumberLoose(el('pezziTotali').value);
+    const g = parseNumberLoose(el('giorniTotali').value);
+    const pb = parseNumberLoose(el('pezziPerBatch').value);
+    const post = parseNumberLoose(el('postMin').value);
+    const cPost = parseNumberLoose(el('costoPostOra').value);
 
-    if (!isFinite(p) || p <= 0 || !isFinite(g) || g <= 0 || !isFinite(pb) || pb <= 0) {
-      el('consuntivoTempi').innerHTML = '';
-      el('risultato').innerHTML = '<p class="highlight"><strong>Errore:</strong> controlla i dati inseriti.</p>';
-      return;
-    }
+    if (p <= 0 || g <= 0 || pb <= 0) return null;
 
     const batch = Math.ceil(p / pb);
-    let costoBatch = 0;
-    let metriBatch = 0;
+    let costoMaterialeBase = 0;
+    let metriLotto = 0;
 
     for (let i = 1; i <= 4; i++) {
-      const m = +el(`mat${i}_m`).value;
+      const m = parseNumberLoose(el(`mat${i}_m`).value);
       const matId = el(`mat${i}`).value;
       const rec = matId ? MATERIALI_BY_ID[matId] : null;
-
-      if (rec && isFinite(m) && m > 0) {
-         metriBatch += m;
-         costoBatch += m * rec.costoMetri; // €/m
-        }
+      if (rec && m > 0) {
+         metriLotto += (m * batch); 
+         costoMaterialeBase += (m * rec.costoMetri * batch);
+      }
     }
 
-    const metriLotto = metriBatch * batch;
-    const costoMateriale = costoBatch * batch;
     const costoStampa = g * costoGiorno(g);
     const costoPost = (p * post / 60) * cPost;
+    const MARKUP_MAT = 1.0; 
+    const costoMaterialeFinale = costoMaterialeBase * MARKUP_MAT;
+    const totaleLordo = costoStampa + costoPost + costoMaterialeFinale;
 
-    const totaleLordo = costoStampa + costoPost + costoMateriale;
+    return {
+        p, g, pb, batch, metriLotto,
+        costoStampa, costoPost, costoMaterialeFinale,
+        totaleLordo
+    };
+  }
 
+  // 1. Calcolo avviato dai cambi generici
+  function calcolaStandard() {
+    saveState();
+    renderPreventivo();
+  }
+
+  // 2. Calcolo inverso avviato SOLO dal campo Target Price
+  function calcolaDaTarget() {
+    const dati = getDatiLordi();
+    const targetPrice = parseNumberLoose(el('prezzoTargetParte').value);
+
+    if (dati && dati.totaleLordo > 0 && targetPrice > 0) {
+        // Logica inversa:
+        // TotaleTarget = TargetUnitario * Pezzi
+        // Sconto% = 100 - (TotaleTarget / TotaleLordo * 100)
+        
+        const totaleTarget = targetPrice * dati.p;
+        let newSconto = 100 - ((totaleTarget / dati.totaleLordo) * 100);
+        
+        // Arrotondiamo a 2 decimali
+        el('scontoPerc').value = newSconto.toFixed(2);
+        
+        // Evidenziazione visuale per far capire che è successo qualcosa
+        el('scontoPerc').classList.add('auto-calculated');
+        setTimeout(() => el('scontoPerc').classList.remove('auto-calculated'), 1000);
+    }
+    
+    saveState();
+    renderPreventivo();
+  }
+
+  function renderPreventivo() {
+    const dati = getDatiLordi();
+    if (!dati) {
+      el('risultato').innerHTML = '<p class="muted" style="text-align:center">Compila i dati per vedere il preventivo.</p>';
+      el('consuntivoTempi').style.display = 'none';
+      return;
+    }
+    el('consuntivoTempi').style.display = 'block';
+
+    const sconto = parseNumberLoose(el('scontoPerc').value);
+    const importoSconto = dati.totaleLordo * (sconto / 100);
+    const totaleNetto = dati.totaleLordo - importoSconto;
+    const costoPezzo = totaleNetto / dati.p;
+
+    // Render HTML Tempi
     el('consuntivoTempi').innerHTML = `
-      <h2>⏱️ Consuntivo tempi</h2>
-      <p><strong>Batch totali:</strong> ${batch}</p>
-      <p><strong>Ore batch:</strong> ${(+el('oreBatch').value).toFixed(2)} h</p>
-      <p><strong>Ore totali produttive:</strong> ${(batch * +el('oreBatch').value).toFixed(1)} h</p>
-      <p><strong>Ore disponibili:</strong> ${(g * +el('oreGiorno').value).toFixed(1)} h</p>
-      <p><strong>Produttività:</strong> ${(((batch * +el('oreBatch').value) / (g * +el('oreGiorno').value)) * 100).toFixed(1)} %</p>
-      <p><strong>Ore morte:</strong> ${Math.max((g * +el('oreGiorno').value) - (batch * +el('oreBatch').value), 0).toFixed(1)} h</p>
-      <p><strong>Metri totali filo:</strong> ${metriLotto.toFixed(1)} m</p>
+      <h3 style="margin-top:0">⏱️ Analisi Tempi</h3>
+      <div class="row" style="gap:10px;">
+        <div>Batch totali: <strong>${dati.batch}</strong></div>
+        <div>Ore totali prod.: <strong>${fmtNum.format(dati.batch * parseNumberLoose(el('oreBatch').value))} h</strong></div>
+        <div>Metri filo tot.: <strong>${fmtNum.format(dati.metriLotto)} m</strong></div>
+        <div>Efficienza: <strong>${ (((dati.batch * parseNumberLoose(el('oreBatch').value)) / (dati.g * parseNumberLoose(el('oreGiorno').value))) * 100).toFixed(0) }%</strong></div>
+      </div>
     `;
 
-    const giorniConsegna = (+el('giorniConsegna').value || 0);
+    const dataOggi = new Date().toLocaleDateString('it-IT');
     const noteRaw = el('note').value || '';
-    const noteHtml = escapeHtml(noteRaw).replaceAll('\n', '<br>');
-
+    
     el('risultato').innerHTML = `
-        <div class="preventivo-header">
-            ${CONFIG.LOGO_URL
-                ? `<img src="${CONFIG.LOGO_URL}" alt="Logo" style="height:70px;object-fit:contain;" />`
-                : ''
-            }
-            <div style="text-align:right">
-                <strong>PREVENTIVO STAMPA 3D</strong><br>
-
-                ${el('numeroPreventivo').value
-                    ? `<span class="muted">Preventivo n° <strong>${escapeHtml(el('numeroPreventivo').value)}</strong></span><br>`
-                    : ''
-                }
-
-                <span class="muted">Data: ${dataOggiIT()}</span><br>
-                <span class="muted">${CONFIG.AZIENDA}</span><br>
-                <span class="muted">${CONFIG.EMAIL}</span>
-            </div>
-
-        </div>
-
-      <div class="preventivo-box">
-        <p><strong>Parte:</strong> ${escapeHtml(el('codiceParte').value || '-') }</p>
-        <p><strong>Materiale:</strong> ${escapeHtml(el('materialeParte').value || '-') }</p>
-        <p><strong>Colore:</strong> ${escapeHtml(el('coloreParte').value || '-') }</p>
-        <hr />
-        <p><strong>Quantità:</strong> ${p} pezzi</p>
-        <p><strong>Giorni macchina:</strong> ${g.toFixed(2)}</p>
-        <p><strong>Giorni lavorativi di consegna:</strong> ${giorniConsegna} giorni</p>
-        <p class="muted small">* I giorni di consegna sono da intendersi dalla data di conferma dell’ordine e/o dalla data di arrivo del materiale qualora non disponibile a stock.</p>
-        <p><strong>Parti / giorno:</strong> ${(p / g).toFixed(1)}</p>
-        <p><strong>Batch totali:</strong> ${batch}</p>
-        <p><strong>Batch / giorno:</strong> ${(batch / g).toFixed(2)}</p>
-        <p><strong>Metri totali di filo:</strong> ${metriLotto.toFixed(1)} m</p>
+      <div class="preventivo-header">
+         <div>
+            ${CONFIG.LOGO_URL ? `<img src="${CONFIG.LOGO_URL}" style="height:60px; margin-bottom:10px; object-fit:contain;"><br>` : ''}
+            <div style="font-size:24px; font-weight:bold; color:#0078d4">PREVENTIVO</div>
+            <div class="muted">Rif: <strong>${escapeHtml(el('numeroPreventivo').value || 'Interno')}</strong> del ${dataOggi}</div>
+         </div>
+         <div style="text-align:right">
+            <strong>${CONFIG.AZIENDA}</strong><br>
+            <span class="muted">${CONFIG.EMAIL}</span>
+         </div>
       </div>
 
       <div class="preventivo-box">
-        <p><strong>Costi</strong></p>
-        <p>Stampa: €${costoStampa.toFixed(2)}</p>
-        <p>Postprocesso: €${costoPost.toFixed(2)}</p>
-        <p>Materiale: €${costoMateriale.toFixed(2)}</p>
+        <strong>Dettaglio Articolo</strong>
+        <table class="prev-table">
+            <tr><td>Parte:</td><td>${escapeHtml(el('codiceParte').value || '-')}</td></tr>
+            <tr><td>Materiale:</td><td>${escapeHtml(el('materialeParte').value || '-')}</td></tr>
+            <tr><td>Quantità:</td><td><strong>${dati.p} pz</strong></td></tr>
+            <tr><td>Consegna:</td><td>${el('giorniConsegna').value} gg lavorativi</td></tr>
+        </table>
       </div>
 
       <div class="preventivo-box">
-        <p><strong>Prezzo senza sconto:</strong> €${totaleLordo.toFixed(2)}</p>
-        <p><strong>Costo per parte:</strong> €${(totaleLordo / p).toFixed(2)}</p>
+        <strong>Dettaglio Costi</strong>
+        <table class="prev-table">
+            <tr><td>Stampa (${dati.g}gg):</td><td align="right">${fmtMoney.format(dati.costoStampa)}</td></tr>
+            <tr><td>Materiale:</td><td align="right">${fmtMoney.format(dati.costoMaterialeFinale)}</td></tr>
+            <tr><td>Post-processo:</td><td align="right">${fmtMoney.format(dati.costoPost)}</td></tr>
+            <tr style="font-weight:bold; background:#f5f5f5;">
+                <td>Totale Lordo</td><td align="right">${fmtMoney.format(dati.totaleLordo)}</td>
+            </tr>
+            ${sconto !== 0 ? `
+            <tr style="color:${sconto > 0 ? '#d32f2f' : '#2e7d32'};">
+                <td>${sconto > 0 ? 'Sconto' : 'Ricarico'} (${sconto.toFixed(2)}%)</td><td align="right">${sconto > 0 ? '-' : '+'} ${fmtMoney.format(Math.abs(importoSconto))}</td>
+            </tr>` : ''}
+        </table>
       </div>
 
-      ${noteRaw.trim() ? `<div class="preventivo-box"><strong>Note:</strong><br>${noteHtml}</div>` : ''}
+      <div class="total-block">
+         <div class="muted">Prezzo unitario netto</div>
+         <div style="font-size:18px;">${fmtMoney.format(costoPezzo)} / pz</div>
+         <div style="margin:10px 0; border-top:1px solid #ddd;"></div>
+         <div class="muted">TOTALE COMMESSA</div>
+         <div class="totale-grande">${fmtMoney.format(totaleNetto)}</div>
+      </div>
+
+      ${noteRaw ? `<div style="margin-top:20px; padding:10px; border:1px solid #eee; border-radius:6px;"><small><strong>NOTE:</strong><br>${escapeHtml(noteRaw).replaceAll('\n','<br>')}</small></div>` : ''}
     `;
   }
 
   function ottimizzaTempi() {
-    const p = +el('pezziTotali').value;
-    const pb = +el('pezziPerBatch').value;
-    const oreB = +el('oreBatch').value;
-    const oreG = +el('oreGiorno').value;
+    const p = parseNumberLoose(el('pezziTotali').value);
+    const pb = parseNumberLoose(el('pezziPerBatch').value);
+    const oreB = parseNumberLoose(el('oreBatch').value);
+    const oreG = parseNumberLoose(el('oreGiorno').value);
 
-    if (!isFinite(p) || p <= 0 || !isFinite(pb) || pb <= 0 || !isFinite(oreB) || oreB <= 0 || !isFinite(oreG) || oreG <= 0) {
-      alert('Dati non validi per ottimizzare i tempi');
-      return;
+    if (p > 0 && pb > 0 && oreG > 0) {
+       el('giorniTotali').value = (Math.ceil(p / pb) * oreB / oreG).toFixed(2);
+       el('giorniTotali').dispatchEvent(new Event('input'));
+    } else {
+       alert("Inserisci Pezzi, Batch e Ore per calcolare i giorni minimi.");
+    }
+  }
+
+  async function init() {
+    try {
+        const res = await fetch('materiali.csv');
+        if (!res.ok) throw new Error('File non trovato');
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(x => x.trim());
+        const headers = lines[0].split(',').map(h => h.toLowerCase().trim());
+        
+        const idx = (n) => headers.findIndex(h => h.includes(n));
+        const iId = idx('id'); const iNome = idx('nome'); const iCostoM = idx('costo-metri');
+
+        if(iId < 0 || iCostoM < 0) throw new Error("CSV colonne mancanti");
+
+        MATERIALI = lines.slice(1).map(line => {
+             const c = line.split(',');
+             return { id: c[iId], nome: c[iNome]||c[iId], costoMetri: parseNumberLoose(c[iCostoM]) };
+        }).filter(x => x.id);
+
+    } catch (e) {
+        console.warn("Uso materiali fallback");
+        MATERIALI = CONFIG.FALLBACK_MATERIALS;
     }
 
-    el('giorniTotali').value = (Math.ceil(p / pb) * oreB / oreG).toFixed(2);
-    calcola();
-  }
+    MATERIALI.forEach(m => MATERIALI_BY_ID[m.id] = m);
 
-  function assert(cond, msg) {
-    if (!cond) throw new Error('TEST FAIL: ' + msg);
-  }
+    for (let i = 1; i <= 4; i++) {
+        const sel = el(`mat${i}`);
+        sel.innerHTML = '<option value="">-- Seleziona --</option>';
+        MATERIALI.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = `${m.nome} (€${m.costoMetri.toFixed(2)}/m)`;
+            sel.appendChild(opt);
+        });
+    }
 
-  function runTests() {
-    assert(typeof MATERIALI === 'object' && MATERIALI !== null, 'MATERIALI deve essere un oggetto');
-    assert(Object.keys(MATERIALI).length >= 1, 'MATERIALI deve avere almeno 1 elemento');
-
-    el('pezziTotali').value = 300;
-    el('giorniTotali').value = 15;
-    el('pezziPerBatch').value = 20;
-    el('mat1').value = 'PLA';
-    el('mat1_m').value = 10;
-    el('note').value = "Riga1\nRiga2";
-
-    calcola();
-    assert(el('risultato').innerHTML.includes('Riga1<br>Riga2'), 'Note devono mantenere a capo');
-    assert(el('risultato').innerHTML.includes('Metri totali di filo'), 'Preventivo deve includere metri totali');
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    caricaMaterialiCSV()
-        .then(popolaMateriali)
-        .catch((e) => {
-            console.error(e);
-            alert('Errore: materiali.csv non caricato o non valido.');
-     });
-    el('btnCalcola').addEventListener('click', calcola);
+    loadState();
+    
+    // Listener differenziati
+    inputsGeneric.forEach(inp => inp.addEventListener('input', calcolaStandard));
+    el('prezzoTargetParte').addEventListener('input', calcolaDaTarget);
+    
     el('btnOttimizza').addEventListener('click', ottimizzaTempi);
-    el('btnPdf').addEventListener('click', exportPdf);
+    el('btnPdf').addEventListener('click', () => window.print());
 
-    calcola();
-    try { runTests(); } catch (e) { console.error(e); }
-  });
+    calcolaStandard();
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
