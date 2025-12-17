@@ -261,10 +261,12 @@ async function caricaMaterialiCSV() {
 
     if (!isFinite(p) || p <= 0 || !isFinite(g) || g <= 0 || !isFinite(pb) || pb <= 0) {
       el('consuntivoTempi').innerHTML = '';
-      el('risultato').innerHTML = '<p class="highlight"><strong>Errore:</strong> controlla i dati inseriti.</p>';
+      el('risultato').innerHTML =
+        '<p class="highlight"><strong>Errore:</strong> controlla i dati inseriti.</p>';
       return;
     }
 
+    // ===== BATCH =====
     const batch = Math.ceil(p / pb);
     let costoBatch = 0;
     let metriBatch = 0;
@@ -275,63 +277,98 @@ async function caricaMaterialiCSV() {
       const rec = matId ? MATERIALI_BY_ID[matId] : null;
 
       if (rec && isFinite(m) && m > 0) {
-         metriBatch += m;
-         costoBatch += m * rec.costoMetri; // €/m
-        }
+        metriBatch += m;
+        costoBatch += m * rec.costoMetri; // €/m
+      }
     }
 
+    // ===== COSTI BASE =====
     const metriLotto = metriBatch * batch;
     const costoMateriale = costoBatch * batch;
     const costoStampa = g * costoGiorno(g);
     const costoPost = (p * post / 60) * cPost;
 
+    // ===== TOTALE LORDO =====
     const totaleLordo = costoStampa + costoPost + costoMateriale;
 
+    // ===== SCONTI =====
+    const scontoPerc = +el('scontoPerc').value || 0;
+    const prezzoTarget = +el('prezzoTargetParte').value || 0;
+
+   let totaleScontato = totaleLordo;
+    let scontoApplicato = 0;
+    let scontoPercEff = 0;
+
+    if (prezzoTarget > 0) {
+      totaleScontato = prezzoTarget * p;
+      scontoApplicato = totaleLordo - totaleScontato;
+      scontoPercEff = totaleLordo > 0
+        ? (scontoApplicato / totaleLordo) * 100
+        : 0;
+    } else if (scontoPerc > 0) {
+      scontoPercEff = scontoPerc;
+      scontoApplicato = totaleLordo * (scontoPerc / 100);
+      totaleScontato = totaleLordo - scontoApplicato;
+    }
+
+    // ===== CONSUNTIVO TEMPI =====
     el('consuntivoTempi').innerHTML = `
       <h2>⏱️ Consuntivo tempi</h2>
       <p><strong>Batch totali:</strong> ${batch}</p>
       <p><strong>Ore batch:</strong> ${(+el('oreBatch').value).toFixed(2)} h</p>
       <p><strong>Ore totali produttive:</strong> ${(batch * +el('oreBatch').value).toFixed(1)} h</p>
       <p><strong>Ore disponibili:</strong> ${(g * +el('oreGiorno').value).toFixed(1)} h</p>
-      <p><strong>Produttività:</strong> ${(((batch * +el('oreBatch').value) / (g * +el('oreGiorno').value)) * 100).toFixed(1)} %</p>
-      <p><strong>Ore morte:</strong> ${Math.max((g * +el('oreGiorno').value) - (batch * +el('oreBatch').value), 0).toFixed(1)} h</p>
+      <p><strong>Produttività:</strong> ${(
+        ((batch * +el('oreBatch').value) / (g * +el('oreGiorno').value)) * 100
+      ).toFixed(1)} %</p>
+      <p><strong>Ore morte:</strong> ${Math.max(
+        g * +el('oreGiorno').value - batch * +el('oreBatch').value,
+        0
+      ).toFixed(1)} h</p>
       <p><strong>Metri totali filo:</strong> ${metriLotto.toFixed(1)} m</p>
     `;
 
-    const giorniConsegna = (+el('giorniConsegna').value || 0);
+    const giorniConsegna = +el('giorniConsegna').value || 0;
     const noteRaw = el('note').value || '';
     const noteHtml = escapeHtml(noteRaw).replaceAll('\n', '<br>');
 
+    // ===== OUTPUT PREVENTIVO =====
     el('risultato').innerHTML = `
-        <div class="preventivo-header">
-            ${CONFIG.LOGO_URL
-                ? `<img src="${CONFIG.LOGO_URL}" alt="Logo" style="height:70px;object-fit:contain;" />`
-                : ''
-            }
-            <div style="text-align:right">
-                <strong>PREVENTIVO STAMPA 3D</strong><br>
+      <div class="preventivo-header">
+        ${
+          CONFIG.LOGO_URL
+            ? `<img src="${CONFIG.LOGO_URL}" alt="Logo" style="height:70px;object-fit:contain;" />`
+            : ''
+        }
+        <div style="text-align:right">
+          <strong>PREVENTIVO STAMPA 3D</strong><br>
 
-                ${el('numeroPreventivo').value
-                    ? `<span class="muted">Preventivo n° <strong>${escapeHtml(el('numeroPreventivo').value)}</strong></span><br>`
-                    : ''
-                }
+          ${
+            el('numeroPreventivo').value
+              ? `<span class="muted">Preventivo n° <strong>${escapeHtml(
+                  el('numeroPreventivo').value
+                )}</strong></span><br>`
+              : ''
+          }
 
-                <span class="muted">Data: ${dataOggiIT()}</span><br>
-                <span class="muted">${CONFIG.AZIENDA}</span><br>
-                <span class="muted">${CONFIG.EMAIL}</span>
-            </div>
-
+          <span class="muted">Data: ${dataOggiIT()}</span><br>
+          <span class="muted">${CONFIG.AZIENDA}</span><br>
+          <span class="muted">${CONFIG.EMAIL}</span>
         </div>
+      </div>
 
       <div class="preventivo-box">
-        <p><strong>Parte:</strong> ${escapeHtml(el('codiceParte').value || '-') }</p>
-        <p><strong>Materiale:</strong> ${escapeHtml(el('materialeParte').value || '-') }</p>
-        <p><strong>Colore:</strong> ${escapeHtml(el('coloreParte').value || '-') }</p>
+        <p><strong>Parte:</strong> ${escapeHtml(el('codiceParte').value || '-')}</p>
+        <p><strong>Materiale:</strong> ${escapeHtml(el('materialeParte').value || '-')}</p>
+        <p><strong>Colore:</strong> ${escapeHtml(el('coloreParte').value || '-')}</p>
         <hr />
         <p><strong>Quantità:</strong> ${p} pezzi</p>
         <p><strong>Giorni macchina:</strong> ${g.toFixed(2)}</p>
         <p><strong>Giorni lavorativi di consegna:</strong> ${giorniConsegna} giorni</p>
-        <p class="muted small">* I giorni di consegna sono da intendersi dalla data di conferma dell’ordine e/o dalla data di arrivo del materiale qualora non disponibile a stock.</p>
+        <p class="muted small">
+          * I giorni di consegna sono da intendersi dalla data di conferma dell’ordine e/o dalla data di
+          arrivo del materiale qualora non disponibile a stock.
+        </p>
         <p><strong>Parti / giorno:</strong> ${(p / g).toFixed(1)}</p>
         <p><strong>Batch totali:</strong> ${batch}</p>
         <p><strong>Batch / giorno:</strong> ${(batch / g).toFixed(2)}</p>
@@ -347,12 +384,22 @@ async function caricaMaterialiCSV() {
 
       <div class="preventivo-box">
         <p><strong>Prezzo senza sconto:</strong> €${totaleLordo.toFixed(2)}</p>
-        <p><strong>Costo per parte:</strong> €${(totaleLordo / p).toFixed(2)}</p>
+
+        ${
+          scontoApplicato > 0
+             ? `<p><strong>Sconto applicato:</strong> ${scontoPercEff.toFixed(1)}%</p>
+                <p><strong>Riduzione:</strong> −€${scontoApplicato.toFixed(2)}</p>
+                <p><strong>Prezzo scontato:</strong> €${totaleScontato.toFixed(2)}</p>`
+                :''
+        }
+
+        <p><strong>Costo per parte:</strong> €${(totaleScontato / p).toFixed(2)}</p>
       </div>
 
       ${noteRaw.trim() ? `<div class="preventivo-box"><strong>Note:</strong><br>${noteHtml}</div>` : ''}
     `;
   }
+
 
   function ottimizzaTempi() {
     const p = +el('pezziTotali').value;
@@ -398,7 +445,6 @@ async function caricaMaterialiCSV() {
      });
     el('btnCalcola').addEventListener('click', calcola);
     el('btnOttimizza').addEventListener('click', ottimizzaTempi);
-    el('btnPdf').addEventListener('click', exportPdf);
 
     calcola();
     try { runTests(); } catch (e) { console.error(e); }
