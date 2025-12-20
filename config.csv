@@ -1,0 +1,13 @@
+id,valore
+start3DMV_M,5
+end3DMV_M,5
+limit3DMV_M,5
+start3DMV_R,1.36
+end3DMV_R,0.46
+limit3DMV_R,110
+startSTR,2.73
+endSTR,0.91
+limitSTR,110
+oreGiorno,22
+costoPostOra3DMV,50
+costoPostOraSTR,50
