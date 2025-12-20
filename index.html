@@ -3,76 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Preventivatore 3D - Interno</title>
+  <title>Preventivatore interno stampa 3d - v0.16</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; padding:30px; color:#333; }
-    .container { max-width:850px; background:#fff; padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); margin: 0 auto; }
+    .container { max-width:1050px; background:#fff; padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); margin: 0 auto; }
     
-    h1 { margin:0 0 5px 0; color:#1a1a1a; }
+    .header-row { display:flex; align-items:baseline; gap:15px; margin-bottom:5px; }
+    h1 { margin:0; color:#1a1a1a; font-size: 28px; }
+    .version-badge { background:#eee; color:#666; padding:2px 8px; border-radius:12px; font-size:12px; font-weight:bold; letter-spacing:0.5px; border:1px solid #ddd; }
+    
     h2 { margin:25px 0 15px 0; font-size:18px; color:#0078d4; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
+    h3 { font-size:14px; margin:0 0 10px 0; color:#555; text-transform:uppercase; letter-spacing:1px; border-bottom:1px dashed #ccc; padding-bottom:5px; }
+
+    label { display:block; margin-top:8px; font-weight:600; font-size: 13px; color:#444; }
+    input, select, textarea { width:100%; padding:8px; margin-top:4px; box-sizing:border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    input:focus { border-color: #0078d4; outline: none; }
     
-    label { display:block; margin-top:12px; font-weight:600; font-size: 14px; color:#444; }
-    input, select, textarea { width:100%; padding:10px; margin-top:6px; box-sizing:border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; transition: border 0.2s; }
-    input:focus, select:focus, textarea:focus { border-color: #0078d4; outline: none; }
-    
+    /* Grid system */
     .row { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items: end; }
-    @media (max-width:760px){ .row{grid-template-columns:1fr; gap: 0;} }
+    .row-config { display:grid; grid-template-columns: 1fr 1fr 1fr 0.8fr 1.2fr 1.2fr; gap:10px; align-items: end; } 
+    .row-post { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:15px; align-items: end; background: #fafafa; padding:10px; border-radius:6px; border:1px solid #eee; margin-top:5px; }
+
+    @media (max-width:900px){ .row, .row-config, .row-post {grid-template-columns:1fr; gap: 0;} }
     
+    .config-box { padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid #ddd; }
+    .config-3dmv { background:#e3f2fd; border-color:#90caf9; }
+    .config-str { background:#e8f5e9; border-color:#a5d6a7; }
+    
+    .sub-section { background:rgba(255,255,255,0.6); padding:10px; border-radius:4px; margin-bottom:10px; }
+
+    /* Campi Output */
+    .field-rate { font-weight:bold; color:#555; background:#f9f9f9; }
+    .field-total { font-weight:bold; border:2px solid; background:#fff; font-size:15px; }
+    .total-3dmv { color:#0d47a1; border-color:#90caf9; }
+    .total-str { color:#1b5e20; border-color:#a5d6a7; }
+
     .btn-group { display: flex; gap: 10px; margin-top: 25px; }
-    button { padding:12px; flex:1; font-size:16px; font-weight: bold; color:white; border:none; border-radius:6px; cursor:pointer; transition: opacity 0.2s; }
-    button:hover{ opacity: 0.9; }
-    
+    button { padding:12px; flex:1; font-size:16px; font-weight: bold; color:white; border:none; border-radius:6px; cursor:pointer; }
     #btnOttimizza { background:#2e7d32; }
     #btnPdf { background:#d32f2f; }
     
-    .result { margin-top:30px; padding:25px; background:#fff; border-radius:8px; border:1px solid #e1e4e8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .muted { color:#666; font-size:13px; margin-top:5px; line-height: 1.4; }
+    .result { margin-top:30px; padding:25px; background:#fff; border-radius:8px; border:1px solid #e1e4e8; }
+    .muted { color:#666; font-size:13px; }
     
     details { margin-top:20px; padding:15px; border:1px solid #e1e4e8; border-radius:8px; background:#fafbfc; }
     summary { font-weight:bold; cursor:pointer; color: #0078d4; }
     
-    /* Stili preventivo */
-    .preventivo-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
-    table.prev-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    table.prev-table td { padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
-    table.prev-table tr:last-child td { border-bottom: none; }
+    .switch-container { display:flex; align-items:center; gap:15px; margin-top:28px; background:#fff; padding:5px 10px; border-radius:4px; border:1px solid #ccc; }
+    .switch-wrapper { display:flex; align-items:center; gap:8px; }
+    .switch-wrapper input { width:auto; margin:0; cursor:pointer; }
+    .switch-wrapper label { margin-top:0; cursor:pointer; }
+
+    .target-box { padding:15px; border-radius:6px; border:1px solid #ccc; }
+    .target-3dmv { background:#e3f2fd; border-color:#90caf9; }
+    .target-str { background:#e8f5e9; border-color:#a5d6a7; }
+
+    /* --- FIX LAYOUT TABELLE --- */
+    table.prev-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+    table.prev-table th, table.prev-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
+    /* Definisco larghezze fisse per allineamento perfetto */
+    .col-desc { width: 65%; }
+    .col-value { width: 35%; text-align: right; }
+    
+    .preventivo-header { display:flex; justify-content:space-between; margin-bottom:20px; border-bottom: 1px solid #eee; padding-bottom:20px; }
     
     .total-block { background:#f9f9f9; padding:15px; border-radius:8px; margin-top:15px; text-align:right; border-left: 5px solid #ccc; }
-    .totale-grande { font-size:26px; font-weight:bold; color: #333; margin-top:5px; }
-
-    /* Evidenziazione campi calcolati automaticamente */
-    .auto-calculated { background-color: #e8f5e9; border-color: #4caf50; }
 
     @media print {
       body { background: #fff; padding: 0; margin: 0; font-family: 'Times New Roman', serif; }
       .container { max-width: none; padding: 0; margin: 0; box-shadow: none; border: none; }
       .container > *:not(#risultato) { display: none !important; }
       #risultato { margin: 0; padding: 0; display: block !important; }
-      .preventivo-header { margin-bottom: 30px; }
-      .total-block { background: none; border: 1px solid #000; }
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Calcolatore Interno Stampa 3D</h1>
-  <div class="muted">Strumento operativo per preventivazione rapida.</div>
+  <div class="header-row">
+    <h1>Preventivatore interno stampa 3d</h1>
+    <span class="version-badge">v0.16</span>
+  </div>
+  <div class="muted">Gestione completa: Cluster, Scorporo IVA Materiale, Speed Premium.</div>
 
-  <details>
-    <summary>⚙️ Parametri Macchina & Costi Orari</summary>
-    <div class="row">
-      <div><label>Ore di stampa/giorno</label><input id="oreGiorno" type="number" value="22" min="1" step="0.1"></div>
-      <div><label>Costo postprocesso €/h</label><input id="costoPostOra" type="number" value="50" min="0" step="0.1"></div>
+  <details open>
+    <summary>📉 Configurazione Costi & Totali</summary>
+    
+    <div class="config-box config-3dmv">
+      <h3 style="color:#0d47a1;">🟦 Costi 3DMV (Interno)</h3>
+      
+      <div class="sub-section">
+          <label style="color:#0d47a1;">1. Cluster Macchine (Base Giornaliera)</label>
+          <div class="row-config">
+            <div><label>Start (€/gg)</label><input id="start3DMV_M" type="number" value="5" min="0"></div>
+            <div><label>End (€/gg)</label><input id="end3DMV_M" type="number" value="5" min="0"></div>
+            <div><label>Limit (gg)</label><input id="limit3DMV_M" type="number" value="5" min="1"></div>
+            
+            <div style="background:#fff; border-radius:4px; border:1px solid #90caf9; text-align:center;">
+                <label style="font-size:11px; margin-top:2px; color:#d84315;">Stampanti</label>
+                <input id="numStampanti" type="number" value="1" min="1" style="border:none; text-align:center; font-weight:bold; color:#d84315; font-size:16px; margin-top:0;">
+            </div>
+            
+            <div><label>Tariffa/gg</label><input id="dispRate3DMV_M" type="text" readonly class="field-rate"></div>
+            <div><label>TOTALE MACCHINE</label><input id="dispTotal3DMV_M" type="text" readonly class="field-total total-3dmv"></div>
+          </div>
+      </div>
+
+      <div class="sub-section">
+          <label style="color:#0d47a1;">2. Ricavo Gestione 3DMV (Tariffa Velocità x Ore Totali)</label>
+          <div class="row-config" style="grid-template-columns: 1fr 1fr 1fr 1fr 1.5fr;">
+            <div><label>Start (€/h)</label><input id="start3DMV_R" type="number" value="1.36" min="0" step="0.01"></div>
+            <div><label>End (€/h)</label><input id="end3DMV_R" type="number" value="0.46" min="0" step="0.01"></div>
+            <div><label>Limit (Ore)</label><input id="limit3DMV_R" type="number" value="110" min="1"></div>
+            
+            <div><label>Tariffa/h</label><input id="dispRate3DMV_R" type="text" readonly class="field-rate" style="color:#d32f2f"></div>
+            <div><label>TOTALE RICAVO</label><input id="dispTotal3DMV_R" type="text" readonly class="field-total total-3dmv"></div>
+          </div>
+      </div>
+      
+      <div class="row">
+        <div><label>Tariffa Post-Processo 3DMV (€/h)</label><input id="costoPostOra3DMV" type="number" value="50" min="0" step="0.1"></div>
+        <div><label>Ore stampa/giorno (Produttività)</label><input id="oreGiorno" type="number" value="22" min="1" step="0.1"></div>
+      </div>
     </div>
-    <div class="row">
-      <div><label>Costo giorno (1)</label><input id="costoG1" type="number" value="60" min="0" step="0.1"></div>
-      <div><label>Costo giorno (2–3)</label><input id="costoG3" type="number" value="48" min="0" step="0.1"></div>
+
+    <div class="config-box config-str">
+      <h3 style="color:#1b5e20;">🟩 Costi S.T.R. (Partner)</h3>
+      <div class="sub-section" style="background:rgba(255,255,255,0.5);">
+        <label style="color:#1b5e20;">3. Gestione Partner (Tariffa Velocità x Ore Totali)</label>
+        <div class="row-config" style="grid-template-columns: 1fr 1fr 1fr 1fr 1.5fr;">
+          <div><label>Start (€/h)</label><input id="startSTR" type="number" value="2.73" min="0" step="0.01"></div>
+          <div><label>End (€/h)</label><input id="endSTR" type="number" value="0.91" min="0" step="0.01"></div>
+          <div><label>Limit (Ore)</label><input id="limitSTR" type="number" value="110" min="1"></div>
+          
+          <div><label>Tariffa/h</label><input id="dispRateSTR" type="text" readonly class="field-rate" style="color:#d32f2f"></div>
+          <div><label>TOTALE S.T.R.</label><input id="dispTotalSTR" type="text" readonly class="field-total total-str"></div>
+        </div>
+      </div>
+      <div class="row">
+          <div><label>Tariffa Post-Processo S.T.R. (€/h)</label><input id="costoPostOraSTR" type="number" value="50" min="0" step="0.1"></div>
+      </div>
     </div>
-    <div class="row">
-      <div><label>Costo giorno (4–7)</label><input id="costoG7" type="number" value="38" min="0" step="0.1"></div>
-      <div><label>Costo giorno (≥8)</label><input id="costoG8" type="number" value="30" min="0" step="0.1"></div>
-    </div>
+
   </details>
 
   <h2>1. Dati Commessa</h2>
@@ -85,10 +157,13 @@
     <div><label>Colore</label><input id="coloreParte" type="text" placeholder="Es. Nero Opaco"></div>
   </div>
 
-  <h2>2. Quantità e Tempi</h2>
+  <h2>2. Quantità e Tempi (singola stampante)</h2>
   <div class="row">
     <div><label>Pezzi totali</label><input id="pezziTotali" type="number" value="100" min="1"></div>
-    <div><label>Giorni macchina (Totali)</label><input id="giorniTotali" type="number" value="5" min="0.01" step="0.01"></div>
+    <div>
+        <label style="color:#d84315;">Giorni Totali (Cluster)</label>
+        <input id="giorniTotali" type="number" value="0" min="0.01" step="0.01" style="font-weight:bold; color:#d84315;">
+    </div>
   </div>
   <div class="row">
     <div><label>Pezzi per batch</label><input id="pezziPerBatch" type="number" value="20" min="1"></div>
@@ -96,35 +171,66 @@
   </div>
   <div class="row">
     <div><label>Giorni consegna</label><input id="giorniConsegna" type="number" value="10" min="1"></div>
-    <div><label>Postprocesso min/pezzo</label><input id="postMin" type="number" value="2" min="0" step="0.1"></div>
+    <div></div>
+  </div>
+  
+  <h3 style="margin-top:20px; color:#555;">🛠️ Post-Processo & Extra</h3>
+  <div class="row-post" style="border-left: 5px solid #90caf9;">
+      <div><label style="color:#0d47a1;">3DMV: Minuti/pz</label><input id="postMin3DMV" type="number" value="0" min="0" step="0.1"></div>
+      <div><label style="color:#0d47a1;">3DMV: Extra (€/pz)</label><input id="extraPezzo3DMV" type="number" value="0" min="0" step="0.01" placeholder="Es. Inserto"></div>
+      <div><label style="color:#1b5e20;">S.T.R.: Minuti/pz</label><input id="postMinSTR" type="number" value="0" min="0" step="0.1"></div>
+      <div><label style="color:#1b5e20;">S.T.R.: Extra (€/pz)</label><input id="extraPezzoSTR" type="number" value="0" min="0" step="0.01" placeholder="Es. Vernice"></div>
   </div>
 
-  <h2>3. Consumo Materiali</h2>
-  <div class="row"><div><label>Materiale 1</label><select id="mat1"></select></div><div><label>Metri/Batch (Mat 1)</label><input id="mat1_m" type="number" value="0" min="0" step="0.01"></div></div>
-  <div class="row"><div><label>Materiale 2</label><select id="mat2"></select></div><div><label>Metri/Batch (Mat 2)</label><input id="mat2_m" type="number" value="0" min="0" step="0.01"></div></div>
+  <h2>3. Materiali & Allocazione</h2>
+  <div class="row"><div><label>Materiale 1</label><select id="mat1"></select></div><div><label>Metri/Batch</label><input id="mat1_m" type="number" value="0" min="0" step="0.01"></div></div>
+  <div class="row"><div><label>Materiale 2</label><select id="mat2"></select></div><div><label>Metri/Batch</label><input id="mat2_m" type="number" value="0" min="0" step="0.01"></div></div>
+  
+  <div class="row" style="margin-top:15px; background:#fff3e0; padding:10px; border-radius:6px; border:1px solid #ffe0b2;">
+      <div>
+          <label>Fattore Ricarico Materiale</label>
+          <input id="matMarkup" type="number" value="1.1" step="0.05" min="1">
+          <div class="muted small">Es. 1.1 = +10%</div>
+      </div>
+      
+      <div class="switch-container">
+          <div class="switch-wrapper">
+             <input type="checkbox" id="checkMatSTR">
+             <label for="checkMatSTR">Sposta costo a S.T.R.</label>
+          </div>
+          
+          <div class="switch-wrapper" id="boxNoIva" style="display:none; background:#ffebee; padding:2px 8px; border-radius:4px; border:1px solid #ef9a9a;">
+             <input type="checkbox" id="checkNoIvaMat">
+             <label for="checkNoIvaMat" style="color:#c62828;">Scorpora IVA (22%)</label>
+          </div>
+      </div>
+  </div>
   
   <details>
     <summary>➕ Altri materiali</summary>
-    <div class="row"><div><label>Materiale 3</label><select id="mat3"></select></div><div><label>Metri/Batch (Mat 3)</label><input id="mat3_m" type="number" value="0" min="0" step="0.01"></div></div>
-    <div class="row"><div><label>Materiale 4</label><select id="mat4"></select></div><div><label>Metri/Batch (Mat 4)</label><input id="mat4_m" type="number" value="0" min="0" step="0.01"></div></div>
+    <div class="row"><div><label>Materiale 3</label><select id="mat3"></select></div><div><label>Metri/Batch</label><input id="mat3_m" type="number" value="0" min="0" step="0.01"></div></div>
+    <div class="row"><div><label>Materiale 4</label><select id="mat4"></select></div><div><label>Metri/Batch</label><input id="mat4_m" type="number" value="0" min="0" step="0.01"></div></div>
   </details>
 
-  <h2>4. Definizione Prezzo (Forzatura Target)</h2>
-  <div class="row" style="background: #e3f2fd; padding:15px; border-radius:8px; border:1px solid #bbdefb;">
-    <div>
-        <label>🎯 Target Price (€/pezzo)</label>
-        <input id="prezzoTargetParte" type="number" placeholder="Inserisci per calcolare sconto..." step="0.01">
-        <div class="small muted">Scrivi qui per calcolare lo sconto al contrario.</div>
-    </div>
-    <div>
-        <label>Sconto applicato (%)</label>
-        <input id="scontoPerc" type="number" value="0" step="0.1">
-        <div class="small muted">Viene aggiornato se imposti un Target.</div>
-    </div>
+  <h2>4. Definizione Prezzi & Target</h2>
+  <div class="row">
+      <div class="target-box target-3dmv">
+          <label style="color:#0d47a1;">🟦 Target 3DMV (€/pz)</label>
+          <input id="target3DMV" type="number" placeholder="Target Interno..." step="0.01">
+          <label style="margin-top:10px; color:#0d47a1;">Sconto 3DMV (%)</label>
+          <input id="sconto3DMV" type="number" value="0" step="0.1">
+      </div>
+
+      <div class="target-box target-str">
+          <label style="color:#1b5e20;">🟩 Target S.T.R. (€/pz)</label>
+          <input id="targetSTR" type="number" placeholder="Target Partner..." step="0.01">
+          <label style="margin-top:10px; color:#1b5e20;">Sconto S.T.R. (%)</label>
+          <input id="scontoSTR" type="number" value="0" step="0.1">
+      </div>
   </div>
 
   <div class="btn-group">
-    <button id="btnOttimizza">⚡ Ottimizza Giorni</button>
+    <button id="btnOttimizza">⚡ Ricalcola Giorni</button>
     <button id="btnPdf">📄 Esporta PDF</button>
   </div>
 
@@ -137,18 +243,20 @@
 
 <script>
   const el = (id) => document.getElementById(id);
-  // Selezioniamo tutti gli input tranne il target price (che ha una logica dedicata)
-  const inputsGeneric = document.querySelectorAll('input:not(#prezzoTargetParte), select, textarea');
+  const inputsGeneric = document.querySelectorAll('input:not(#numStampanti):not(#target3DMV):not(#targetSTR):not([readonly]), select, textarea');
+  
+  // VERSIONE APP E CHIAVE STORAGE
+  const APP_VERSION = '0.16';
+  const STORAGE_KEY = '3d_calc_int_v' + APP_VERSION.replace('.', '_');
 
   const CONFIG = {
-    LOGO_URL: 'assets/logo.png', // LOGO RIPRISTINATO
+    LOGO_URL: 'assets/logo.png',
     AZIENDA: '3DMV Makers',
     EMAIL: '3dmv.makers@gmail.com',
     FALLBACK_MATERIALS: [
         { id: 'PLA_GEN', nome: 'PLA Generico', costoMetri: 0.06 },
         { id: 'PETG_GEN', nome: 'PETG Generico', costoMetri: 0.07 },
-        { id: 'NYLON_12', nome: 'Nylon PA12', costoMetri: 0.25 },
-        { id: 'TPU_95', nome: 'TPU 95A', costoMetri: 0.12 }
+        { id: 'NYLON_12', nome: 'Nylon PA12', costoMetri: 0.25 }
     ]
   };
 
@@ -161,53 +269,120 @@
     return Number.isFinite(n) ? n : 0;
   };
 
-  const escapeHtml = (str) => String(str).replace(/[&<>"']/g, function(m) {
-    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m];
-  });
-
+  const escapeHtml = (str) => String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','-':'&#45;','"' : '&quot;',"'" : '&#39;'})[m]);
   const fmtMoney = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
   const fmtNum = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 2 });
 
-  // --- STORAGE ---
+  // CONFIG CSV LOADER
+  async function loadConfigDefaults() {
+      try {
+          const res = await fetch('config.csv');
+          if (!res.ok) return; 
+          const text = await res.text();
+          const lines = text.split(/\r?\n/);
+          lines.forEach(line => {
+             const parts = line.split(',');
+             if(parts.length >= 2) {
+                 const key = parts[0].trim();
+                 const val = parts[1].trim();
+                 const element = el(key);
+                 if(element && !element.readOnly) {
+                     element.value = val;
+                 }
+             }
+          });
+          ricalcolaGiorniAuto();
+      } catch(e) { console.log('Nessun config.csv trovato, uso default hardcoded.'); }
+  }
+
+  // STORAGE
   function saveState() {
     const data = {};
     document.querySelectorAll('input, select, textarea').forEach(i => {
-        if(i.id) data[i.id] = i.value;
+        if(i.id && !i.readOnly) {
+            if(i.type === 'checkbox') data[i.id] = i.checked;
+            else data[i.id] = i.value;
+        }
     });
-    localStorage.setItem('3d_calc_internal_v2', JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
   function loadState() {
-    const saved = localStorage.getItem('3d_calc_internal_v2');
+    const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return;
     try {
         const data = JSON.parse(saved);
         Object.keys(data).forEach(k => {
             const field = el(k);
-            if (field) field.value = data[k];
+            if (field && !field.readOnly) {
+                if(field.type === 'checkbox') field.checked = data[k];
+                else field.value = data[k];
+            }
         });
-    } catch(e) { console.error(e); }
+        toggleNoIvaBox();
+    } catch(e) {}
   }
 
-  // --- LOGICA BUSINESS ---
-  function costoGiorno(g) {
-    if (g <= 1) return parseNumberLoose(el('costoG1').value);
-    if (g <= 3) return parseNumberLoose(el('costoG3').value);
-    if (g <= 7) return parseNumberLoose(el('costoG7').value);
-    return parseNumberLoose(el('costoG8').value);
+  function toggleNoIvaBox() {
+      const isMatSTR = el('checkMatSTR').checked;
+      el('boxNoIva').style.display = isMatSTR ? 'flex' : 'none';
+      if(!isMatSTR) el('checkNoIvaMat').checked = false; 
   }
 
-  // Funzione pura che calcola solo i costi LORDI (senza sconto)
+  function calcolaLogaritmica(inputVal, start, end, limit) {
+    if (inputVal <= 1) return start;
+    if (inputVal >= limit) return end;
+    if (limit <= 1) return start;
+    const delta = start - end;
+    const factor = delta / Math.log(limit);
+    return start - (factor * Math.log(inputVal));
+  }
+
+  function ricalcolaGiorniAuto() {
+      const p = parseNumberLoose(el('pezziTotali').value);
+      const pb = parseNumberLoose(el('pezziPerBatch').value);
+      const oreB = parseNumberLoose(el('oreBatch').value);
+      const oreG = parseNumberLoose(el('oreGiorno').value);
+      const nStamp = parseNumberLoose(el('numStampanti').value) || 1;
+
+      if (p > 0 && pb > 0 && oreG > 0) {
+         const batchNecessari = Math.ceil(p / pb);
+         const oreTotaliStampa = batchNecessari * oreB;
+         const capacitaCluster = oreG * nStamp;
+         el('giorniTotali').value = (oreTotaliStampa / capacitaCluster).toFixed(2);
+      }
+      calcolaStandard(); 
+  }
+
   function getDatiLordi() {
     const p = parseNumberLoose(el('pezziTotali').value);
     const g = parseNumberLoose(el('giorniTotali').value);
     const pb = parseNumberLoose(el('pezziPerBatch').value);
-    const post = parseNumberLoose(el('postMin').value);
-    const cPost = parseNumberLoose(el('costoPostOra').value);
+    const nStampanti = parseNumberLoose(el('numStampanti').value) || 1;
+    
+    // Parametri Post Processo
+    const postMin3DMV = parseNumberLoose(el('postMin3DMV').value);
+    const extraPezzo3DMV = parseNumberLoose(el('extraPezzo3DMV').value);
+    const costoPostOra3DMV = parseNumberLoose(el('costoPostOra3DMV').value);
+
+    const postMinSTR = parseNumberLoose(el('postMinSTR').value);
+    const extraPezzoSTR = parseNumberLoose(el('extraPezzoSTR').value);
+    const costoPostOraSTR = parseNumberLoose(el('costoPostOraSTR').value);
+
+    const matMarkup = parseNumberLoose(el('matMarkup').value) || 1;
+    const isMatSTR = el('checkMatSTR').checked;
+    const isNoIvaMat = el('checkNoIvaMat').checked;
+    
+    // Parametri Tempo
+    const orePerBatch = parseNumberLoose(el('oreBatch').value);
+    const oreGiorno = parseNumberLoose(el('oreGiorno').value);
 
     if (p <= 0 || g <= 0 || pb <= 0) return null;
 
-    const batch = Math.ceil(p / pb);
+    const batchTotali = Math.ceil(p / pb);
+    const oreTotaliVolume = batchTotali * orePerBatch; 
+    const oreCalendario = g * oreGiorno;
+
     let costoMaterialeBase = 0;
     let metriLotto = 0;
 
@@ -216,77 +391,119 @@
       const matId = el(`mat${i}`).value;
       const rec = matId ? MATERIALI_BY_ID[matId] : null;
       if (rec && m > 0) {
-         metriLotto += (m * batch); 
-         costoMaterialeBase += (m * rec.costoMetri * batch);
+         metriLotto += (m * batchTotali); 
+         costoMaterialeBase += (m * rec.costoMetri * batchTotali);
       }
     }
+    
+    if (isMatSTR && isNoIvaMat) {
+        costoMaterialeBase = costoMaterialeBase / 1.22;
+    }
 
-    const costoStampa = g * costoGiorno(g);
-    const costoPost = (p * post / 60) * cPost;
-    const MARKUP_MAT = 1.0; 
-    const costoMaterialeFinale = costoMaterialeBase * MARKUP_MAT;
-    const totaleLordo = costoStampa + costoPost + costoMaterialeFinale;
+    const costoMaterialeFinale = costoMaterialeBase * matMarkup;
+    
+    // Post Processo
+    const costoPost3DMV = (p * postMin3DMV / 60 * costoPostOra3DMV) + (p * extraPezzo3DMV);
+    const costoPostSTR = (p * postMinSTR / 60 * costoPostOraSTR) + (p * extraPezzoSTR);
 
-    return {
-        p, g, pb, batch, metriLotto,
-        costoStampa, costoPost, costoMaterialeFinale,
-        totaleLordo
+    // --- CALCOLO 3DMV ---
+    const rateBase_M = calcolaLogaritmica(g, parseNumberLoose(el('start3DMV_M').value), parseNumberLoose(el('end3DMV_M').value), parseNumberLoose(el('limit3DMV_M').value));
+    const rateCluster_M = rateBase_M * nStampanti;
+    const costoMacchine_3DMV = rateCluster_M * g; 
+
+    const rate_R = calcolaLogaritmica(oreCalendario, parseNumberLoose(el('start3DMV_R').value), parseNumberLoose(el('end3DMV_R').value), parseNumberLoose(el('limit3DMV_R').value));
+    const costoRicavo_3DMV = rate_R * oreTotaliVolume;
+
+    el('dispRate3DMV_M').value = fmtMoney.format(rateCluster_M);
+    el('dispTotal3DMV_M').value = fmtMoney.format(costoMacchine_3DMV);
+    el('dispRate3DMV_R').value = fmtMoney.format(rate_R);
+    el('dispTotal3DMV_R').value = fmtMoney.format(costoRicavo_3DMV);
+
+    // --- CALCOLO S.T.R. ---
+    const rate_STR = calcolaLogaritmica(oreCalendario, parseNumberLoose(el('startSTR').value), parseNumberLoose(el('endSTR').value), parseNumberLoose(el('limitSTR').value));
+    const costoService_STR = rate_STR * oreTotaliVolume;
+    
+    el('dispRateSTR').value = fmtMoney.format(rate_STR);
+    el('dispTotalSTR').value = fmtMoney.format(costoService_STR);
+
+    // --- TOTALI LORDI ---
+    let totale3DMV = costoMacchine_3DMV + costoRicavo_3DMV + costoPost3DMV;
+    if (!isMatSTR) totale3DMV += costoMaterialeFinale;
+
+    let totaleSTR = costoService_STR + costoPostSTR;
+    if (isMatSTR) totaleSTR += costoMaterialeFinale;
+
+    return { 
+        p, g, pb, batch: batchTotali, metriLotto, nStampanti, oreCalendario, oreTotaliVolume,
+        costoMacchine_3DMV, costoRicavo_3DMV, 
+        costoPost3DMV, costoPostSTR,
+        costoService_STR,
+        costoMaterialeFinale, isMatSTR, isNoIvaMat,
+        totale3DMV, totaleSTR 
     };
   }
 
-  // 1. Calcolo avviato dai cambi generici
   function calcolaStandard() {
     saveState();
     renderPreventivo();
   }
 
-  // 2. Calcolo inverso avviato SOLO dal campo Target Price
-  function calcolaDaTarget() {
-    const dati = getDatiLordi();
-    const targetPrice = parseNumberLoose(el('prezzoTargetParte').value);
+  function calcolaTarget3DMV() {
+      const dati = getDatiLordi();
+      const t = parseNumberLoose(el('target3DMV').value);
+      if(dati && t > 0 && dati.totale3DMV > 0) {
+          const targetTot = t * dati.p;
+          const sc = 100 - ((targetTot / dati.totale3DMV)*100);
+          el('sconto3DMV').value = sc.toFixed(2);
+      }
+      saveState();
+      renderPreventivo();
+  }
 
-    if (dati && dati.totaleLordo > 0 && targetPrice > 0) {
-        // Logica inversa:
-        // TotaleTarget = TargetUnitario * Pezzi
-        // Sconto% = 100 - (TotaleTarget / TotaleLordo * 100)
-        
-        const totaleTarget = targetPrice * dati.p;
-        let newSconto = 100 - ((totaleTarget / dati.totaleLordo) * 100);
-        
-        // Arrotondiamo a 2 decimali
-        el('scontoPerc').value = newSconto.toFixed(2);
-        
-        // Evidenziazione visuale per far capire che è successo qualcosa
-        el('scontoPerc').classList.add('auto-calculated');
-        setTimeout(() => el('scontoPerc').classList.remove('auto-calculated'), 1000);
-    }
-    
-    saveState();
-    renderPreventivo();
+  function calcolaTargetSTR() {
+      const dati = getDatiLordi();
+      const t = parseNumberLoose(el('targetSTR').value);
+      if(dati && t > 0 && dati.totaleSTR > 0) {
+          const targetTot = t * dati.p;
+          const sc = 100 - ((targetTot / dati.totaleSTR)*100);
+          el('scontoSTR').value = sc.toFixed(2);
+      }
+      saveState();
+      renderPreventivo();
   }
 
   function renderPreventivo() {
     const dati = getDatiLordi();
     if (!dati) {
-      el('risultato').innerHTML = '<p class="muted" style="text-align:center">Compila i dati per vedere il preventivo.</p>';
+      el('risultato').innerHTML = '<p class="muted" style="text-align:center">Compila i dati...</p>';
       el('consuntivoTempi').style.display = 'none';
       return;
     }
     el('consuntivoTempi').style.display = 'block';
 
-    const sconto = parseNumberLoose(el('scontoPerc').value);
-    const importoSconto = dati.totaleLordo * (sconto / 100);
-    const totaleNetto = dati.totaleLordo - importoSconto;
-    const costoPezzo = totaleNetto / dati.p;
+    const sconto3DMV = parseNumberLoose(el('sconto3DMV').value);
+    const scontoSTR = parseNumberLoose(el('scontoSTR').value);
 
-    // Render HTML Tempi
+    // Calcolo Netti
+    const importoSconto3DMV = dati.totale3DMV * (sconto3DMV / 100);
+    const netto3DMV = dati.totale3DMV - importoSconto3DMV;
+
+    const importoScontoSTR = dati.totaleSTR * (scontoSTR / 100);
+    const nettoSTR = dati.totaleSTR - importoScontoSTR;
+
+    const totaleNettoComplessivo = netto3DMV + nettoSTR;
+    const costoPezzo = totaleNettoComplessivo / dati.p;
+
+    // Unitari
+    const unitario3DMV = netto3DMV / dati.p;
+    const unitarioSTR = nettoSTR / dati.p;
+
     el('consuntivoTempi').innerHTML = `
-      <h3 style="margin-top:0">⏱️ Analisi Tempi</h3>
+      <h3 style="margin-top:0">⏱️ Consuntivo Cluster (${dati.nStampanti} Macchine)</h3>
       <div class="row" style="gap:10px;">
         <div>Batch totali: <strong>${dati.batch}</strong></div>
-        <div>Ore totali prod.: <strong>${fmtNum.format(dati.batch * parseNumberLoose(el('oreBatch').value))} h</strong></div>
-        <div>Metri filo tot.: <strong>${fmtNum.format(dati.metriLotto)} m</strong></div>
-        <div>Efficienza: <strong>${ (((dati.batch * parseNumberLoose(el('oreBatch').value)) / (dati.g * parseNumberLoose(el('oreGiorno').value))) * 100).toFixed(0) }%</strong></div>
+        <div>Volume Stampa: <strong>${fmtNum.format(dati.oreTotaliVolume)} h</strong></div>
+        <div>Durata (Velocità): <strong>${fmtNum.format(dati.oreCalendario)} h</strong> (${dati.g.toFixed(2)} gg)</div>
       </div>
     `;
 
@@ -309,6 +526,10 @@
       <div class="preventivo-box">
         <strong>Dettaglio Articolo</strong>
         <table class="prev-table">
+            <colgroup>
+               <col class="col-desc">
+               <col class="col-value">
+            </colgroup>
             <tr><td>Parte:</td><td>${escapeHtml(el('codiceParte').value || '-')}</td></tr>
             <tr><td>Materiale:</td><td>${escapeHtml(el('materialeParte').value || '-')}</td></tr>
             <tr><td>Quantità:</td><td><strong>${dati.p} pz</strong></td></tr>
@@ -319,70 +540,87 @@
       <div class="preventivo-box">
         <strong>Dettaglio Costi</strong>
         <table class="prev-table">
-            <tr><td>Stampa (${dati.g}gg):</td><td align="right">${fmtMoney.format(dati.costoStampa)}</td></tr>
-            <tr><td>Materiale:</td><td align="right">${fmtMoney.format(dati.costoMaterialeFinale)}</td></tr>
-            <tr><td>Post-processo:</td><td align="right">${fmtMoney.format(dati.costoPost)}</td></tr>
-            <tr style="font-weight:bold; background:#f5f5f5;">
-                <td>Totale Lordo</td><td align="right">${fmtMoney.format(dati.totaleLordo)}</td>
+            <colgroup>
+               <col class="col-desc">
+               <col class="col-value">
+            </colgroup>
+            
+            <tr style="background:#e3f2fd; border-bottom:1px solid #bbdefb;">
+                <td colspan="2" style="font-weight:bold; color:#0d47a1;">QUOTA 3DMV (Interno)</td>
             </tr>
-            ${sconto !== 0 ? `
-            <tr style="color:${sconto > 0 ? '#d32f2f' : '#2e7d32'};">
-                <td>${sconto > 0 ? 'Sconto' : 'Ricarico'} (${sconto.toFixed(2)}%)</td><td align="right">${sconto > 0 ? '-' : '+'} ${fmtMoney.format(Math.abs(importoSconto))}</td>
+            <tr><td style="padding-left:15px; font-size:13px;">• Cluster (${dati.nStampanti}x Macchine):</td><td align="right">${fmtMoney.format(dati.costoMacchine_3DMV)}</td></tr>
+            <tr><td style="padding-left:15px; font-size:13px;">• Ricavo Gestione (Speed Premium):</td><td align="right">${fmtMoney.format(dati.costoRicavo_3DMV)}</td></tr>
+            <tr><td style="padding-left:15px; font-size:13px;">• Post-Processo & Extra:</td><td align="right">${fmtMoney.format(dati.costoPost3DMV)}</td></tr>
+            ${!dati.isMatSTR ? `<tr><td style="padding-left:15px; font-size:13px;">• Materiale:</td><td align="right">${fmtMoney.format(dati.costoMaterialeFinale)}</td></tr>` : ''}
+            
+            ${sconto3DMV !== 0 ? `
+            <tr style="color:${sconto3DMV > 0 ? '#d32f2f' : '#2e7d32'};">
+                <td align="right" style="padding-right:10px;">${sconto3DMV > 0 ? 'Sconto' : 'Ricarico'} (${sconto3DMV.toFixed(2)}%)</td><td align="right">${sconto3DMV > 0 ? '-' : '+'} ${fmtMoney.format(Math.abs(importoSconto3DMV))}</td>
             </tr>` : ''}
+            
+            <tr style="font-weight:bold; color:#0d47a1;">
+                <td align="right">TOTALE QUOTA 3DMV:</td>
+                <td align="right">
+                    ${fmtMoney.format(netto3DMV)}<br>
+                    <span style="font-size:11px; font-weight:normal; color:#555;">(Unitario: ${fmtMoney.format(unitario3DMV)})</span>
+                </td>
+            </tr>
+
+            <tr><td colspan="2" style="height:15px;"></td></tr>
+            <tr style="background:#e8f5e9; border-bottom:1px solid #c8e6c9;">
+                <td colspan="2" style="font-weight:bold; color:#1b5e20;">QUOTA S.T.R. (Partner)</td>
+            </tr>
+            <tr><td style="padding-left:15px; font-size:13px;">• Gestione Commessa (Speed Premium):</td><td align="right">${fmtMoney.format(dati.costoService_STR)}</td></tr>
+            <tr><td style="padding-left:15px; font-size:13px;">• Post-Processo & Extra:</td><td align="right">${fmtMoney.format(dati.costoPostSTR)}</td></tr>
+            ${dati.isMatSTR ? `<tr><td style="padding-left:15px; font-size:13px;">• Materiale: ${dati.isNoIvaMat ? '<span style="color:#c62828; font-weight:bold;">(No IVA)</span>' : ''}</td><td align="right">${fmtMoney.format(dati.costoMaterialeFinale)}</td></tr>` : ''}
+            
+            ${scontoSTR !== 0 ? `
+            <tr style="color:${scontoSTR > 0 ? '#d32f2f' : '#2e7d32'};">
+                <td align="right" style="padding-right:10px;">${scontoSTR > 0 ? 'Sconto' : 'Ricarico'} (${scontoSTR.toFixed(2)}%)</td><td align="right">${scontoSTR > 0 ? '-' : '+'} ${fmtMoney.format(Math.abs(importoScontoSTR))}</td>
+            </tr>` : ''}
+            
+            <tr style="font-weight:bold; color:#1b5e20;">
+                <td align="right">TOTALE QUOTA S.T.R.:</td>
+                <td align="right">
+                    ${fmtMoney.format(nettoSTR)}<br>
+                    <span style="font-size:11px; font-weight:normal; color:#555;">(Unitario: ${fmtMoney.format(unitarioSTR)})</span>
+                </td>
+            </tr>
+
+            <tr><td colspan="2" style="height:15px; border-bottom:2px solid #333;"></td></tr>
+            <tr style="font-weight:bold; font-size:18px;">
+                <td>TOTALE FORNITURA</td><td align="right">${fmtMoney.format(totaleNettoComplessivo)}</td>
+            </tr>
         </table>
       </div>
 
       <div class="total-block">
          <div class="muted">Prezzo unitario netto</div>
          <div style="font-size:18px;">${fmtMoney.format(costoPezzo)} / pz</div>
-         <div style="margin:10px 0; border-top:1px solid #ddd;"></div>
-         <div class="muted">TOTALE COMMESSA</div>
-         <div class="totale-grande">${fmtMoney.format(totaleNetto)}</div>
       </div>
-
       ${noteRaw ? `<div style="margin-top:20px; padding:10px; border:1px solid #eee; border-radius:6px;"><small><strong>NOTE:</strong><br>${escapeHtml(noteRaw).replaceAll('\n','<br>')}</small></div>` : ''}
     `;
-  }
-
-  function ottimizzaTempi() {
-    const p = parseNumberLoose(el('pezziTotali').value);
-    const pb = parseNumberLoose(el('pezziPerBatch').value);
-    const oreB = parseNumberLoose(el('oreBatch').value);
-    const oreG = parseNumberLoose(el('oreGiorno').value);
-
-    if (p > 0 && pb > 0 && oreG > 0) {
-       el('giorniTotali').value = (Math.ceil(p / pb) * oreB / oreG).toFixed(2);
-       el('giorniTotali').dispatchEvent(new Event('input'));
-    } else {
-       alert("Inserisci Pezzi, Batch e Ore per calcolare i giorni minimi.");
-    }
   }
 
   async function init() {
     try {
         const res = await fetch('materiali.csv');
-        if (!res.ok) throw new Error('File non trovato');
+        if (!res.ok) throw new Error();
         const text = await res.text();
         const lines = text.split(/\r?\n/).filter(x => x.trim());
         const headers = lines[0].split(',').map(h => h.toLowerCase().trim());
-        
         const idx = (n) => headers.findIndex(h => h.includes(n));
         const iId = idx('id'); const iNome = idx('nome'); const iCostoM = idx('costo-metri');
-
-        if(iId < 0 || iCostoM < 0) throw new Error("CSV colonne mancanti");
-
-        MATERIALI = lines.slice(1).map(line => {
-             const c = line.split(',');
-             return { id: c[iId], nome: c[iNome]||c[iId], costoMetri: parseNumberLoose(c[iCostoM]) };
-        }).filter(x => x.id);
-
+        if(iId >= 0 && iCostoM >= 0) {
+            MATERIALI = lines.slice(1).map(line => {
+                const c = line.split(',');
+                return { id: c[iId], nome: c[iNome]||c[iId], costoMetri: parseNumberLoose(c[iCostoM]) };
+            }).filter(x => x.id);
+        } else throw new Error();
     } catch (e) {
-        console.warn("Uso materiali fallback");
         MATERIALI = CONFIG.FALLBACK_MATERIALS;
     }
-
     MATERIALI.forEach(m => MATERIALI_BY_ID[m.id] = m);
-
     for (let i = 1; i <= 4; i++) {
         const sel = el(`mat${i}`);
         sel.innerHTML = '<option value="">-- Seleziona --</option>';
@@ -393,19 +631,28 @@
             sel.appendChild(opt);
         });
     }
-
+    
+    // Ordine: 1. Carica Config CSV, 2. Carica Stato Utente
+    await loadConfigDefaults();
     loadState();
-    
-    // Listener differenziati
+
+    el('checkMatSTR').addEventListener('change', () => { toggleNoIvaBox(); calcolaStandard(); });
+    el('checkNoIvaMat').addEventListener('change', calcolaStandard);
+    el('numStampanti').addEventListener('input', ricalcolaGiorniAuto);
+    el('pezziTotali').addEventListener('input', ricalcolaGiorniAuto);
+    el('pezziPerBatch').addEventListener('input', ricalcolaGiorniAuto);
+    el('oreBatch').addEventListener('input', ricalcolaGiorniAuto);
+    el('oreGiorno').addEventListener('input', ricalcolaGiorniAuto);
+
     inputsGeneric.forEach(inp => inp.addEventListener('input', calcolaStandard));
-    el('prezzoTargetParte').addEventListener('input', calcolaDaTarget);
-    
-    el('btnOttimizza').addEventListener('click', ottimizzaTempi);
+    el('target3DMV').addEventListener('input', calcolaTarget3DMV);
+    el('targetSTR').addEventListener('input', calcolaTargetSTR);
+    el('btnOttimizza').addEventListener('click', ricalcolaGiorniAuto);
     el('btnPdf').addEventListener('click', () => window.print());
-
-    calcolaStandard();
+    
+    toggleNoIvaBox(); 
+    ricalcolaGiorniAuto();
   }
-
   window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
