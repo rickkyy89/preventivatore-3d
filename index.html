@@ -498,6 +498,27 @@
     const unitario3DMV = netto3DMV / dati.p;
     const unitarioSTR = nettoSTR / dati.p;
 
+    // ===== SCONTI =====
+    const scontoPerc = +el('scontoPerc').value || 0;
+    const prezzoTarget = +el('prezzoTargetParte').value || 0;
+
+   let totaleScontato = totaleLordo;
+    let scontoApplicato = 0;
+    let scontoPercEff = 0;
+
+    if (prezzoTarget > 0) {
+      totaleScontato = prezzoTarget * p;
+      scontoApplicato = totaleLordo - totaleScontato;
+      scontoPercEff = totaleLordo > 0
+        ? (scontoApplicato / totaleLordo) * 100
+        : 0;
+    } else if (scontoPerc > 0) {
+      scontoPercEff = scontoPerc;
+      scontoApplicato = totaleLordo * (scontoPerc / 100);
+      totaleScontato = totaleLordo - scontoApplicato;
+    }
+
+    // ===== CONSUNTIVO TEMPI =====
     el('consuntivoTempi').innerHTML = `
       <h3 style="margin-top:0">⏱️ Consuntivo Cluster (${dati.nStampanti} Macchine)</h3>
       <div class="row" style="gap:10px;">
