@@ -3,11 +3,11 @@ start3DMV_M,5
 end3DMV_M,5
 limit3DMV_M,5
 start3DMV_R,1.56
-end3DMV_R,0.52
-limit3DMV_R,110
+end3DMV_R,0.54
+limit3DMV_R,220
 startSTR,2.94
-endSTR,0.98
-limitSTR,110
+endSTR,0.96
+limitSTR,220
 oreGiorno,22
 costoPostOra3DMV,50
 costoPostOraSTR,50
