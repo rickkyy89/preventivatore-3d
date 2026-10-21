@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Preventivatore interno stampa 3d - v0.19</title>
+  <title>Preventivatore interno stampa 3d - v0.20</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; padding:30px; color:#333; }
     .container { max-width:1050px; background:#fff; padding:30px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); margin: 0 auto; }
@@ -80,7 +80,7 @@
 <div class="container">
   <div class="header-row">
     <h1>Preventivatore interno stampa 3d</h1>
-    <span class="version-badge">v0.19</span>
+    <span class="version-badge">v0.20</span>
   </div>
   <div class="muted">Gestione completa: Cluster, Scorporo IVA Materiale, Speed Premium.</div>
 
@@ -93,8 +93,8 @@
       <div class="sub-section">
           <label style="color:#0d47a1;">1. Cluster Macchine (Base Giornaliera)</label>
           <div class="row-config">
-            <div><label>Start (€/gg)</label><input id="start3DMV_M" type="number" value="5" min="0"></div>
-            <div><label>End (€/gg)</label><input id="end3DMV_M" type="number" value="5" min="0"></div>
+            <div><label>Start (€/gg)</label><input id="start3DMV_M" type="number" value="25" min="0"></div>
+            <div><label>End (€/gg)</label><input id="end3DMV_M" type="number" value="12.5" min="0"></div>
             <div><label>Limit (gg)</label><input id="limit3DMV_M" type="number" value="5" min="1"></div>
             
             <div style="background:#fff; border-radius:4px; border:1px solid #90caf9; text-align:center;">
@@ -110,9 +110,9 @@
       <div class="sub-section">
           <label style="color:#0d47a1;">2. Ricavo Gestione 3DMV (Tariffa Velocità x Ore Totali)</label>
           <div class="row-config" style="grid-template-columns: 1fr 1fr 1fr 1fr 1.5fr;">
-            <div><label>Start (€/h)</label><input id="start3DMV_R" type="number" value="1.36" min="0" step="0.01"></div>
-            <div><label>End (€/h)</label><input id="end3DMV_R" type="number" value="0.46" min="0" step="0.01"></div>
-            <div><label>Limit (Ore)</label><input id="limit3DMV_R" type="number" value="110" min="1"></div>
+            <div><label>Start (€/h)</label><input id="start3DMV_R" type="number" value="2.94" min="0" step="0.01"></div>
+            <div><label>End (€/h)</label><input id="end3DMV_R" type="number" value="0.96" min="0" step="0.01"></div>
+            <div><label>Limit (Ore)</label><input id="limit3DMV_R" type="number" value="220" min="1"></div>
             
             <div><label>Tariffa/h</label><input id="dispRate3DMV_R" type="text" readonly class="field-rate" style="color:#d32f2f"></div>
             <div><label>TOTALE RICAVO</label><input id="dispTotal3DMV_R" type="text" readonly class="field-total total-3dmv"></div>
@@ -244,7 +244,7 @@
   const inputsGeneric = document.querySelectorAll('input:not(#numStampanti):not(#target3DMV):not(#targetSTR):not([readonly]), select, textarea');
   
   // VERSIONE APP E CHIAVE STORAGE
-  const APP_VERSION = '0.19';
+  const APP_VERSION = '0.20';
   const STORAGE_KEY = '3d_calc_int_v' + APP_VERSION.replace('.', '_');
 
   const CONFIG = {
