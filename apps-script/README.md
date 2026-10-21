@@ -9,7 +9,7 @@ Stato: codice preparato; occorre creare e autorizzare la web app nel proprio acc
 1. Crea un progetto Google Apps Script dal tuo account.
 2. Incolla `Code.gs` nel file di codice e aggiungi un file HTML chiamato `Login`, usando `Login.html`. Aggiungi anche il file di codice `Bcrypt.gs` (libreria bcryptjs 2.4.3 inclusa, con licenza nel sorgente).
 3. Nelle Impostazioni progetto → Proprietà script inserisci `SETUP_EMAIL` (la tua email) e `SETUP_PASSWORD` (la password scelta). Queste proprietà devono restare private: non metterle su GitHub.
-4. Dall'editor esegui `setupUser_` e autorizza l'accesso al Drive e il recupero delle pagine della repository. La funzione crea la cartella privata e il CSV dell'utente, poi elimina `SETUP_PASSWORD` e `SETUP_EMAIL`.
+4. Dall'editor esegui `inizializzaUtente` e autorizza l'accesso al Drive e il recupero delle pagine della repository. La funzione crea la cartella privata e il CSV dell'utente, poi elimina `SETUP_PASSWORD` e `SETUP_EMAIL`.
 5. Distribuisci come app web: esegui come proprietario, accesso a chiunque. Solo la pagina di login è pubblica: ogni funzione che legge o scrive i preventivi richiede una sessione valida. I file CSV non vanno condivisi pubblicamente.
 6. Apri il link `/exec` risultante. Verifica login, salvataggio e ricaricamento con un preventivo di prova. Per usare lo storico, utilizzare questo link: il sito GitHub Pages originale non viene trasformato automaticamente nella web app.
 
@@ -17,7 +17,7 @@ La web app legge il preventivatore, i materiali e i costi dal branch `main` dell
 
 ## Utenti
 
-Per aggiungere un altro utente, ripetere i punti 3 e 4 con la sua email e password. Non c'è registrazione pubblica. Ogni utente ha un CSV differente; il server sceglie il file dalla sessione e non accetta un ID file dal browser. `setupUser_` non è richiamabile dal browser e non sovrascrive credenziali esistenti.
+Per aggiungere un altro utente, ripetere i punti 3 e 4 con la sua email e password. Non c'è registrazione pubblica. Ogni utente ha un CSV differente; il server sceglie il file dalla sessione e non accetta un ID file dal browser. `setupUser_` non è richiamabile dal browser e non sovrascrive credenziali esistenti. La funzione visibile nell'editor `inizializzaUtente` controlla che l'utente Google attivo coincida con il proprietario prima di chiamarla.
 
 ## Storico
 
