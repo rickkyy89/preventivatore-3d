@@ -404,13 +404,15 @@
 
     let costoMaterialeBase = 0;
     let metriLotto = 0;
+    const metriPerMateriale = new Map();
 
     for (let i = 1; i <= 4; i++) {
       const m = parseNumberLoose(safeVal(`mat${i}_m`));
       const matId = safeVal(`mat${i}`);
       const rec = matId ? MATERIALI_BY_ID[matId] : null;
       if (rec && m > 0) {
-         metriLotto += (m * batchTotali); 
+         metriLotto += (m * batchTotali);
+         metriPerMateriale.set(matId, (metriPerMateriale.get(matId) || 0) + m * batchTotali * matMarkup); 
          costoMaterialeBase += (m * rec.costoMetri * batchTotali);
       }
     }
@@ -420,6 +422,17 @@
     }
 
     const metriFiloPrevisti = metriLotto * matMarkup;
+    let bobineMinime = 0;
+    for (const [matId, metri] of metriPerMateriale) {
+        const capacita = MATERIALI_BY_ID[matId].metriBobina;
+        if (!(capacita > 0)) {
+            bobineMinime = null;
+            break;
+        }
+        // Arrotonda solo dopo aver sommato le righe dello stesso materiale.
+        const rapporto = metri / capacita;
+        bobineMinime += Math.ceil(rapporto - Number.EPSILON * Math.max(1, rapporto) * 4);
+    }
     const costoMaterialeFinale = costoMaterialeBase * matMarkup;
     
     // Post Processo
@@ -454,7 +467,7 @@
     if (isMatSTR) totaleSTR += costoMaterialeFinale;
 
     return { 
-        p, g, pb, batch: batchTotali, metriLotto, metriFiloPrevisti, nStampanti, oreCalendario, oreTotaliVolume,
+        p, g, pb, batch: batchTotali, metriLotto, metriFiloPrevisti, bobineMinime, nStampanti, oreCalendario, oreTotaliVolume,
         costoMacchine_3DMV, costoRicavo_3DMV, 
         costoPost3DMV, costoPostSTR,
         costoService_STR,
@@ -558,7 +571,8 @@
             </colgroup>
             <tr><td>Parte:</td><td>${escapeHtml(codParte)}</td></tr>
             <tr><td>Materiale:</td><td>${escapeHtml(matParte)}</td></tr>
-            <tr><td>Filo previsto (moltiplicatore incluso):</td><td>${fmtNum.format(dati.metriFiloPrevisti)} m</td></tr>
+            <tr><td>Filo previsto:</td><td>${fmtNum.format(dati.metriFiloPrevisti)} m</td></tr>
+            <tr><td>Numero minimo bobine:</td><td>${dati.bobineMinime === null ? 'N/D (metri per bobina mancanti)' : dati.bobineMinime}</td></tr>
             <tr><td>Quantità:</td><td><strong>${dati.p} pz</strong></td></tr>
             <tr><td>Consegna:</td><td>${ggConsegna} gg lavorativi</td></tr>
         </table>
@@ -638,10 +652,11 @@
         const headers = lines[0].split(',').map(h => h.toLowerCase().trim());
         const idx = (n) => headers.findIndex(h => h.includes(n));
         const iId = idx('id'); const iNome = idx('nome'); const iCostoM = idx('costo-metri');
+        const iMetri = headers.indexOf('metri');
         if(iId >= 0 && iCostoM >= 0) {
             MATERIALI = lines.slice(1).map(line => {
                 const c = line.split(',');
-                return { id: c[iId], nome: c[iNome]||c[iId], costoMetri: parseNumberLoose(c[iCostoM]) };
+                return { id: c[iId], nome: c[iNome]||c[iId], costoMetri: parseNumberLoose(c[iCostoM]), metriBobina: iMetri >= 0 ? parseNumberLoose(c[iMetri]) : 0 };
             }).filter(x => x.id);
         } else throw new Error();
     } catch (e) {
