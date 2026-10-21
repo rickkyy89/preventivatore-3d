@@ -52,6 +52,10 @@ function createUser(email) {
   assert(!props.has('SETUP_EMAIL'));
 }
 createUser('one@example.test'); createUser('two@example.test');
+context.Session = {getActiveUser: () => ({getEmail: () => ''}), getEffectiveUser: () => ({getEmail: () => 'owner@example.test'})};
+assert.throws(() => context.inizializzaUtente(), /Solo il proprietario/);
+context.Session.getActiveUser = () => ({getEmail: () => 'different@example.test'});
+assert.throws(() => context.inizializzaUtente(), /Solo il proprietario/);
 assert.throws(() => context.login('one@example.test', 'wrong'), /non corrette/);
 const one = context.login('one@example.test', 'Only-a-test-password!');
 const two = context.login('two@example.test', 'Only-a-test-password!');
