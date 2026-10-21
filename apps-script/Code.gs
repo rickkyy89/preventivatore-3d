@@ -37,15 +37,15 @@ function setupUser_() {
     if (!properties.getProperty('AUTH_PEPPER')) properties.setProperty('AUTH_PEPPER', Utilities.getUuid() + Utilities.getUuid());
     let folderId = properties.getProperty('QUOTES_FOLDER_ID');
     if (!folderId) {
-      folderId = DriveApp.createFolder('Preventivatore 3DMV - Storico privato').getId();
+      folderId = driveCreateFolder_('Preventivatore 3DMV - Storico privato');
       properties.setProperty('QUOTES_FOLDER_ID', folderId);
     }
     const salt = Utilities.getUuid();
-    const file = DriveApp.getFolderById(folderId).createFile('preventivi_' + email.replace(/[^a-z0-9@._-]/g, '_') + '.csv', csvString_([CSV_HEADER_]), MimeType.CSV);
+    const fileId = driveCreateCsv_(folderId, 'preventivi_' + email.replace(/[^a-z0-9@._-]/g, '_') + '.csv', csvString_([CSV_HEADER_]));
     const saltBytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + Utilities.getUuid(), Utilities.Charset.UTF_8).slice(0, 16).map(value => value & 255);
     const bcryptSalt = '$2a$12$' + dcodeIO.bcrypt.encodeBase64(saltBytes, saltBytes.length);
     const verifier = dcodeIO.bcrypt.hashSync(verifier_(email, salt, password), bcryptSalt);
-    properties.setProperty(key, JSON.stringify({email, salt, verifier, fileId: file.getId(), version: Utilities.getUuid()}));
+    properties.setProperty(key, JSON.stringify({email, salt, verifier, fileId, version: Utilities.getUuid()}));
     properties.deleteProperty('SETUP_PASSWORD');
     properties.deleteProperty('SETUP_EMAIL');
     return 'Utente creato. Password temporanea rimossa dalle proprietà.';
@@ -109,7 +109,7 @@ function saveQuote(token, payload) {
     const id = Utilities.getUuid();
     const row = [id, new Date().toISOString(), state.numeroPreventivo, state.codiceParte, state.materialeParte || '', state.coloreParte || '', state.pezziTotali, String(Number(payload.total) || 0), json];
     rows.push(row);
-    DriveApp.getFileById(user.fileId).setContent(csvString_([CSV_HEADER_].concat(rows)));
+    driveWriteCsv_(user.fileId, csvString_([CSV_HEADER_].concat(rows)));
     return {id, savedAt: row[1]};
   });
 }
@@ -126,7 +126,7 @@ function sessionUser_(token) {
 }
 
 function readRows_(user) {
-  const rows = Utilities.parseCsv(DriveApp.getFileById(user.fileId).getBlob().getDataAsString('UTF-8'));
+  const rows = Utilities.parseCsv(driveReadCsv_(user.fileId));
   if (JSON.stringify(rows[0]) !== JSON.stringify(CSV_HEADER_)) throw new Error('CSV non valido: archivio non modificato.');
   const data = rows.slice(1).filter(row => row.some(value => value !== ''));
   if (data.some(row => row.length !== CSV_HEADER_.length)) throw new Error('CSV danneggiato: archivio non modificato.');
@@ -163,7 +163,6 @@ function locked_(fn) {
   lock.waitLock(10000);
   try { return fn(); } finally { lock.releaseLock(); }
 }
-
 // Avvio dall'editor: i visitatori della web app non possono creare utenti.
 function inizializzaUtente() {
   const active = Session.getActiveUser().getEmail();
@@ -171,4 +170,33 @@ function inizializzaUtente() {
     throw new Error('Solo il proprietario Google può inizializzare gli utenti.');
   }
   return setupUser_();
+}
+
+// API Drive con scope drive.file: accesso solo ai file creati dall'app.
+function driveRequest_(url, method, payload, contentType) {
+  const options = {method, headers: {Authorization: 'Bearer ' + ScriptApp.getOAuthToken()}, muteHttpExceptions: true};
+  if (payload !== undefined) { options.payload = payload; options.contentType = contentType; }
+  const response = UrlFetchApp.fetch(url, options);
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) throw new Error('Drive non disponibile o autorizzazione mancante. Nessun salvataggio confermato.');
+  return response.getContentText();
+}
+
+function driveCreateFolder_(name) {
+  return JSON.parse(driveRequest_('https://www.googleapis.com/drive/v3/files', 'post', JSON.stringify({name, mimeType: 'application/vnd.google-apps.folder'}), 'application/json')).id;
+}
+
+function driveCreateCsv_(folderId, name, csv) {
+  const boundary = 'boundary_' + Utilities.getUuid();
+  const metadata = JSON.stringify({name, mimeType: 'text/csv', parents: [folderId]});
+  const body = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + metadata
+    + '\r\n--' + boundary + '\r\nContent-Type: text/csv; charset=UTF-8\r\n\r\n' + csv + '\r\n--' + boundary + '--';
+  return JSON.parse(driveRequest_('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', 'post', body, 'multipart/related; boundary=' + boundary)).id;
+}
+
+function driveReadCsv_(fileId) {
+  return driveRequest_('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId) + '?alt=media', 'get');
+}
+
+function driveWriteCsv_(fileId, csv) {
+  driveRequest_('https://www.googleapis.com/upload/drive/v3/files/' + encodeURIComponent(fileId) + '?uploadType=media', 'patch', csv, 'text/csv; charset=UTF-8');
 }

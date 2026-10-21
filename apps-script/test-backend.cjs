@@ -44,6 +44,10 @@ const context = vm.createContext({
 });
 vm.runInContext(fs.readFileSync(path.join(base, 'Bcrypt.gs'), 'utf8'), context);
 vm.runInContext(fs.readFileSync(path.join(base, 'Code.gs'), 'utf8'), context);
+context.driveCreateFolder_ = () => 'test-folder';
+context.driveCreateCsv_ = (folder, name, text) => {const id = crypto.randomUUID(); files.set(id, text); return id;};
+context.driveReadCsv_ = id => {assert(files.has(id)); return files.get(id);};
+context.driveWriteCsv_ = (id, text) => {assert(files.has(id)); files.set(id, text);};
 function createUser(email) {
   props.set('SETUP_EMAIL', email);
   props.set('SETUP_PASSWORD', 'Only-a-test-password!');
