@@ -420,6 +420,7 @@
         costoMaterialeBase = costoMaterialeBase / 1.22;
     }
 
+    const metriFiloPrevisti = metriLotto * matMarkup;
     const costoMaterialeFinale = costoMaterialeBase * matMarkup;
     
     // Post Processo
@@ -454,7 +455,7 @@
     if (isMatSTR) totaleSTR += costoMaterialeFinale;
 
     return { 
-        p, g, pb, batch: batchTotali, metriLotto, nStampanti, oreCalendario, oreTotaliVolume,
+        p, g, pb, batch: batchTotali, metriLotto, metriFiloPrevisti, nStampanti, oreCalendario, oreTotaliVolume,
         costoMacchine_3DMV, costoRicavo_3DMV, 
         costoPost3DMV, costoPostSTR,
         costoService_STR,
@@ -558,6 +559,7 @@
             </colgroup>
             <tr><td>Parte:</td><td>${escapeHtml(codParte)}</td></tr>
             <tr><td>Materiale:</td><td>${escapeHtml(matParte)}</td></tr>
+            <tr><td>Filo previsto (moltiplicatore incluso):</td><td>${fmtNum.format(dati.metriFiloPrevisti)} m</td></tr>
             <tr><td>Quantità:</td><td><strong>${dati.p} pz</strong></td></tr>
             <tr><td>Consegna:</td><td>${ggConsegna} gg lavorativi</td></tr>
         </table>
