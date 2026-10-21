@@ -84,6 +84,10 @@
   </div>
   <div class="muted">Gestione completa: Cluster, Scorporo IVA Materiale, Speed Premium.</div>
 
+  <div class="btn-group" style="margin-top:15px;">
+    <button id="btnValori" type="button" style="background:#0078d4;">🆕 Nuovo preventivo (valori di default)</button>
+  </div>
+
   <details open>
     <summary>📉 Configurazione Costi & Totali</summary>
     
@@ -307,7 +311,11 @@
   }
 
   // STORAGE
-  function saveState() {
+  let defaultState = null;
+  let showingDefaults = false;
+  const PREVIOUS_STATE_KEY = STORAGE_KEY + '_previous_quote';
+
+  function captureState() {
     const data = {};
     document.querySelectorAll('input, select, textarea').forEach(i => {
         if(i.id && !i.readOnly) {
@@ -315,7 +323,22 @@
             else data[i.id] = i.value;
         }
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return data;
+  }
+
+  function applyState(data) {
+    Object.keys(data).forEach(k => {
+        const field = el(k);
+        if (field && !field.readOnly) {
+            if (field.type === 'checkbox') field.checked = data[k];
+            else field.value = data[k];
+        }
+    });
+    toggleNoIvaBox();
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(captureState()));
   }
 
   function loadState() {
@@ -332,6 +355,24 @@
         });
         toggleNoIvaBox();
     } catch(e) {}
+  }
+
+  function toggleQuoteDefaults() {
+    if (!defaultState) return;
+    if (!showingDefaults) {
+        localStorage.setItem(PREVIOUS_STATE_KEY, JSON.stringify(captureState()));
+        applyState(defaultState);
+        showingDefaults = true;
+    } else {
+        const saved = localStorage.getItem(PREVIOUS_STATE_KEY);
+        if (!saved) return;
+        try { applyState(JSON.parse(saved)); } catch (e) { return; }
+        showingDefaults = false;
+    }
+    el('btnValori').textContent = showingDefaults
+        ? '↩ Ripristina ultimi valori inseriti'
+        : '🆕 Nuovo preventivo (valori di default)';
+    calcolaStandard();
   }
 
   function toggleNoIvaBox() {
@@ -683,7 +724,16 @@
     }
     
     await loadConfigDefaults();
+    // Calcola i valori iniziali senza salvare sopra l'ultimo preventivo.
+    const pDefault = parseNumberLoose(safeVal('pezziTotali'));
+    const pbDefault = parseNumberLoose(safeVal('pezziPerBatch'));
+    const capacitaDefault = parseNumberLoose(safeVal('oreGiorno')) * (parseNumberLoose(safeVal('numStampanti')) || 1);
+    if (pbDefault > 0 && capacitaDefault > 0) {
+        el('giorniTotali').value = (Math.ceil(pDefault / pbDefault) * parseNumberLoose(safeVal('oreBatch')) / capacitaDefault).toFixed(2);
+    }
+    defaultState = captureState();
     loadState();
+    el('btnValori').addEventListener('click', toggleQuoteDefaults);
 
     if(el('checkMatSTR')) el('checkMatSTR').addEventListener('change', () => { toggleNoIvaBox(); calcolaStandard(); });
     if(el('checkNoIvaMat')) el('checkNoIvaMat').addEventListener('change', calcolaStandard);
