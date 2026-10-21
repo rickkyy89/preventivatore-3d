@@ -2,18 +2,28 @@
 
 Implementazione per Google Apps Script, senza database esterno o abbonamenti.
 Il piano gratuito Google è soggetto alle quote del proprio account e allo spazio Drive disponibile.
-Stato: codice preparato; occorre creare e autorizzare la web app nel proprio account Google.
+Stato al 21 ottobre 2026: web app pubblicata e primo utente inizializzato. GitHub Pages è disattivato.
 
-## Installazione (una volta)
+**[Apri la web app](https://script.google.com/macros/s/AKfycbyLR31AvCTo2u6p1aHOnEiM7lyybeqkCY37pcrMD1z1JIYPdGbHJ3f6HtfcGiZ3EYII/exec)**
+
+Il [README principale](../README.md) descrive il collegamento tra GitHub, Apps Script e Drive e la procedura per aggiornare ciascuna parte. La pubblicazione è stata verificata fino alla schermata di login; la prova completa sul servizio reale di accesso e storico resta da completare. I test locali con servizi Google simulati sono passati.
+
+## Installazione di una nuova istanza (una volta)
 
 1. Crea un progetto Google Apps Script dal tuo account.
 2. Abilita la visualizzazione del manifest nelle impostazioni e sostituisci `appsscript.json` con quello incluso (scope `drive.file`, solo file creati dall'app). Incolla `Code.gs` nel file di codice e aggiungi un file HTML chiamato `Login`, usando `Login.html`. Aggiungi anche il file di codice `Bcrypt.gs` (libreria bcryptjs 2.4.3 inclusa, con licenza nel sorgente).
 3. Nelle Impostazioni progetto → Proprietà script inserisci `SETUP_EMAIL` (la tua email) e `SETUP_PASSWORD` (la password scelta). Queste proprietà devono restare private: non metterle su GitHub.
 4. Dall'editor esegui `inizializzaUtente` e autorizza l'accesso ai soli file Drive creati dall'app e il recupero delle pagine della repository. La funzione crea la cartella privata e il CSV dell'utente, poi elimina `SETUP_PASSWORD` e `SETUP_EMAIL`.
 5. Distribuisci come app web: esegui come proprietario, accesso a chiunque. Solo la pagina di login è pubblica: ogni funzione che legge o scrive i preventivi richiede una sessione valida. I file CSV non vanno condivisi pubblicamente.
-6. Apri il link `/exec` risultante. Verifica login, salvataggio e ricaricamento con un preventivo di prova. Per usare lo storico, utilizzare questo link: il sito GitHub Pages originale non viene trasformato automaticamente nella web app.
+6. Apri il link `/exec` risultante. Verifica login, salvataggio e ricaricamento con un preventivo di prova. Per usare lo storico, utilizzare questo link: GitHub Pages non è necessario ed è disattivato nel repository attuale.
 
 La web app legge il preventivatore, i materiali e i costi dal branch `main` della repository. Non duplica il codice dei calcoli. Se cambia la struttura di inizializzazione, il controllo di compatibilità richiede di aggiornare l'adattatore `doGet`.
+
+## Aggiornamento dell'istanza attuale
+
+Il progetto Google si chiama **Preventivatore 3DMV - Login e storico Drive**. Nel progetto attuale `Codice.gs` contiene prima la libreria `Bcrypt.gs` e poi `Code.gs`; `Login.html` e `appsscript.json` sono separati. Non copiare anche una seconda definizione della libreria.
+
+I file principali del calcolatore sono letti da GitHub a ogni apertura della web app; il logo viene caricato dal browser. Le modifiche a questi file su `main` non richiedono un deployment Google, finché restano compatibili con `doGet()`. Il backend e il frammento di login, invece, non vengono scaricati dal repository: dopo un loro aggiornamento copiare i sorgenti nel progetto, salvare e aggiornare il deployment esistente a una nuova versione, mantenendo lo stesso URL. Non eliminare le proprietà private né reinizializzare gli utenti durante un normale aggiornamento.
 
 ## Utenti
 
