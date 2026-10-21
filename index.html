@@ -399,6 +399,8 @@
     if (p <= 0 || g <= 0 || pb <= 0) return null;
 
     const batchTotali = Math.ceil(p / pb);
+    // Materiale proporzionale ai pezzi effettivi; lo scarto è nel moltiplicatore.
+    const batchEquivalentiMateriale = p / pb;
     const oreTotaliVolume = batchTotali * orePerBatch; 
     const oreCalendario = g * oreGiorno;
 
@@ -411,9 +413,10 @@
       const matId = safeVal(`mat${i}`);
       const rec = matId ? MATERIALI_BY_ID[matId] : null;
       if (rec && m > 0) {
-         metriLotto += (m * batchTotali);
-         metriPerMateriale.set(matId, (metriPerMateriale.get(matId) || 0) + m * batchTotali * matMarkup); 
-         costoMaterialeBase += (m * rec.costoMetri * batchTotali);
+         const metriMateriale = m * batchEquivalentiMateriale;
+         metriLotto += metriMateriale;
+         metriPerMateriale.set(matId, (metriPerMateriale.get(matId) || 0) + metriMateriale * matMarkup); 
+         costoMaterialeBase += metriMateriale * rec.costoMetri;
       }
     }
     
