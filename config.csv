@@ -1,9 +1,9 @@
 id,valore
-start3DMV_M,5
-end3DMV_M,5
+start3DMV_M,25
+end3DMV_M,12.5
 limit3DMV_M,5
-start3DMV_R,1.56
-end3DMV_R,0.54
+start3DMV_R,2.94
+end3DMV_R,0.96
 limit3DMV_R,220
 startSTR,2.94
 endSTR,0.96
