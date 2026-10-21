@@ -163,3 +163,12 @@ function locked_(fn) {
   lock.waitLock(10000);
   try { return fn(); } finally { lock.releaseLock(); }
 }
+
+// Avvio dall'editor: i visitatori della web app non possono creare utenti.
+function inizializzaUtente() {
+  const active = Session.getActiveUser().getEmail();
+  if (!active || active !== Session.getEffectiveUser().getEmail()) {
+    throw new Error('Solo il proprietario Google può inizializzare gli utenti.');
+  }
+  return setupUser_();
+}
