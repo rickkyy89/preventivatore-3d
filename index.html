@@ -535,7 +535,10 @@
     const noteRaw = el('note') ? el('note').value : '';
     const numPrev = el('numeroPreventivo') ? el('numeroPreventivo').value : '-';
     const codParte = el('codiceParte') ? el('codiceParte').value : '-';
-    const matParte = el('materialeParte') ? el('materialeParte').value : '-';
+    const matParte = ['materialeParte', 'coloreParte']
+        .map(id => (el(id)?.value || '').trim())
+        .filter(Boolean)
+        .join(' – ') || '-';
     const ggConsegna = el('giorniConsegna') ? el('giorniConsegna').value : '-';
 
     if(el('consuntivoTempi')) el('consuntivoTempi').innerHTML = `
