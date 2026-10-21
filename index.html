@@ -676,6 +676,20 @@
     if(el('target3DMV')) el('target3DMV').addEventListener('input', calcolaTarget3DMV);
     if(el('targetSTR')) el('targetSTR').addEventListener('input', calcolaTargetSTR);
     if(el('btnOttimizza')) el('btnOttimizza').addEventListener('click', ricalcolaGiorniAuto);
+    // Il browser usa il titolo del documento come nome suggerito del PDF.
+    const titoloPagina = document.title;
+    window.addEventListener('beforeprint', () => {
+        const nomePreventivo = ['numeroPreventivo', 'codiceParte']
+            .map(id => (el(id)?.value || '').trim())
+            .filter(Boolean)
+            .join('_')
+            .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+            .replace(/[. ]+$/g, '');
+        document.title = nomePreventivo || 'Preventivo';
+    });
+    window.addEventListener('afterprint', () => {
+        document.title = titoloPagina;
+    });
     if(el('btnPdf')) el('btnPdf').addEventListener('click', () => window.print());
     
     toggleNoIvaBox(); 
